@@ -26,6 +26,8 @@ A beautiful, local-first Desktop Application for managing your customers, produc
 
 You can find the latest release for your platform (Windows, macOS, Linux) under the **[Releases](https://github.com/Psychotoxical/invoice/releases)** tab.
 
+For a detailed list of new features and fixes across updates, see the **[Changelog](CHANGELOG.md)**.
+
 ## 🚀 Development Setup
 
 If you want to contribute or build the application yourself, make sure you have the [Tauri prerequisites](https://v2.tauri.app/start/prerequisites/) installed (Node.js, Rust, and system dependencies).
