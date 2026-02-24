@@ -2,7 +2,7 @@
 
 A beautiful, local-first Desktop Application for managing your customers, products, and invoices. Built for freelancers and small businesses who value data privacy and offline capability.
 
-![Rechnung Screenshot](https://raw.githubusercontent.com/Psychotoxical/invoice/main/app-icon.png)
+![Rechnung Screenshot](screenshot.png)
 
 ## ✨ Features
 
