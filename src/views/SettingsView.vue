@@ -92,7 +92,7 @@
         <div class="card-body">
           <div style="display: flex; flex-direction: column; gap: 4px; font-size: var(--font-size-sm); color: var(--text-secondary)">
             <div><strong style="color: var(--text-primary)">{{ $t('app.title') }}</strong> – {{ $t('app.subtitle') }}</div>
-            <div>{{ $t('settings.version') }}</div>
+            <div>{{ $t('settings.version') }} {{ appVersion }}</div>
             <div>{{ $t('settings.copyright') }}</div>
           </div>
         </div>
@@ -109,6 +109,7 @@ import { getSetting, setSetting } from '../services/database';
 import { open, save } from '@tauri-apps/plugin-dialog';
 import { copyFile } from '@tauri-apps/plugin-fs';
 import { appDataDir } from '@tauri-apps/api/path';
+import { getVersion } from '@tauri-apps/api/app';
 
 const { locale } = useI18n();
 
@@ -119,6 +120,7 @@ const defaultTaxRate = ref(19);
 const currency = ref('EUR');
 const defaultNote = ref('');
 const backupMessage = ref('');
+const appVersion = ref('');
 
 onMounted(async () => {
   try {
@@ -132,6 +134,12 @@ onMounted(async () => {
     const cur = await getSetting('currency');
     if (cur) currency.value = cur;
     defaultNote.value = await getSetting('default_note');
+    
+    try {
+      appVersion.value = await getVersion();
+    } catch {
+      appVersion.value = '1.0.x';
+    }
   } catch (e) { console.error(e); }
 });
 
