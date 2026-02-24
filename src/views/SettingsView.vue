@@ -12,8 +12,8 @@
           <div class="form-group">
             <label class="form-label">{{ $t('settings.languageHint') }}</label>
             <select class="form-select" style="max-width: 200px" v-model="language" @change="changeLanguage">
-              <option value="de">🇩🇪 Deutsch</option>
-              <option value="en">🇬🇧 English</option>
+              <option value="de">Deutsch</option>
+              <option value="en">English (UK)</option>
             </select>
           </div>
         </div>
