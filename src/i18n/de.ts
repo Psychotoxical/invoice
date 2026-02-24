@@ -247,7 +247,7 @@ export default {
         backupSuccess: '✓ Backup gespeichert: {path}',
         backupError: 'Fehler beim Backup: ',
         about: 'Über die App',
-        version: 'Version 1.0.0',
+        version: 'Version',
         copyright: '© 2026 Frank Stellmacher',
         language: 'Sprache',
         languageHint: 'Wähle die App-Sprache',
