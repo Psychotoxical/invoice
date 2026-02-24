@@ -1,4 +1,4 @@
-import { createRouter, createWebHistory } from 'vue-router';
+import { createRouter, createWebHashHistory } from 'vue-router';
 import DashboardView from './views/DashboardView.vue';
 import SellersView from './views/SellersView.vue';
 import CustomersView from './views/CustomersView.vue';
@@ -8,7 +8,7 @@ import InvoiceFormView from './views/InvoiceFormView.vue';
 import SettingsView from './views/SettingsView.vue';
 
 const router = createRouter({
-    history: createWebHistory(),
+    history: createWebHashHistory(),
     routes: [
         { path: '/', name: 'dashboard', component: DashboardView },
         { path: '/sellers', name: 'sellers', component: SellersView },
