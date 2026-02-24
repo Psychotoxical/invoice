@@ -80,8 +80,10 @@
         <div class="card-body">
           <div class="flex gap-2">
             <button class="btn btn-secondary" @click="exportDb">{{ $t('settings.exportBackup') }}</button>
+            <button class="btn btn-secondary" @click="importDb">{{ $t('settings.importBackup') }}</button>
           </div>
           <div class="form-hint" style="margin-top: 8px">{{ $t('settings.backupHint') }}</div>
+          <div class="form-hint" style="margin-top: 4px">{{ $t('settings.importHint') }}</div>
           <div v-if="backupMessage" class="form-hint" style="margin-top: 8px; color: var(--success)">{{ backupMessage }}</div>
         </div>
       </div>
@@ -111,7 +113,7 @@ import { copyFile } from '@tauri-apps/plugin-fs';
 import { appConfigDir, join } from '@tauri-apps/api/path';
 import { getVersion } from '@tauri-apps/api/app';
 
-const { locale } = useI18n();
+const { locale, t } = useI18n();
 
 const language = ref('de');
 const downloadFolder = ref('');
@@ -181,7 +183,26 @@ async function exportDb() {
     }
   } catch (e) {
     console.error('Backup error:', e);
-    backupMessage.value = 'Fehler beim Backup: ' + String(e);
+    backupMessage.value = t('settings.backupError') + String(e);
+  }
+}
+
+async function importDb() {
+  try {
+    const selected = await open({
+      multiple: false,
+      title: t('settings.importBackup'),
+      filters: [{ name: 'SQLite Database', extensions: ['db'] }],
+    });
+    if (selected && typeof selected === 'string') {
+      const dataDir = await appConfigDir();
+      const dbPath = await join(dataDir, 'rechnung.db');
+      await copyFile(selected, dbPath);
+      backupMessage.value = t('settings.importSuccess');
+    }
+  } catch (e) {
+    console.error('Import error:', e);
+    backupMessage.value = String(e);
   }
 }
 </script>
