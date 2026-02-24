@@ -108,7 +108,7 @@ import { useI18n } from 'vue-i18n';
 import { getSetting, setSetting } from '../services/database';
 import { open, save } from '@tauri-apps/plugin-dialog';
 import { copyFile } from '@tauri-apps/plugin-fs';
-import { appDataDir } from '@tauri-apps/api/path';
+import { appConfigDir, join } from '@tauri-apps/api/path';
 import { getVersion } from '@tauri-apps/api/app';
 
 const { locale } = useI18n();
@@ -164,8 +164,8 @@ async function pickFolder() {
 
 async function exportDb() {
   try {
-    const dataDir = await appDataDir();
-    const dbPath = dataDir + 'rechnung.db';
+    const dataDir = await appConfigDir();
+    const dbPath = await join(dataDir, 'rechnung.db');
     const now = new Date();
     const ts = `${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, '0')}${String(now.getDate()).padStart(2, '0')}_${String(now.getHours()).padStart(2, '0')}${String(now.getMinutes()).padStart(2, '0')}`;
     const defaultName = `rechnung_backup_${ts}.db`;

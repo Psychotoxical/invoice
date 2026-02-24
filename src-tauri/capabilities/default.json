@@ -28,6 +28,21 @@
       "allow": [
         {
           "path": "**"
+        },
+        {
+          "path": "$APPDATA/**"
+        },
+        {
+          "path": "$APPLOCALDATA/**"
+        },
+        {
+          "path": "$DOWNLOAD/**"
+        },
+        {
+          "path": "$HOME/**"
+        },
+        {
+          "path": "$APPCONFIG/**"
         }
       ]
     }
