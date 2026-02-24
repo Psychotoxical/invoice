@@ -54,3 +54,9 @@ This project is licensed under the **MIT License**. See the `LICENSE` file for d
 ---
 
 *Note: This application was entirely **vibecoded**.*
+
+The reason for this is that I had been searching for a simple invoicing tool to cover my needs for ages. However, the tools I found were either massive ERP systems, too expensive, poorly designed, or stuffed with ads. 
+
+I know that *vibecoding* doesn't have the best reputation in parts of the Open Source community. To those critics, I have a simple tip: just don't use it and keep scrolling. And to everyone else who actually has a use for this tool: I hope you enjoy the app!
+
+Thankfully, *vibecoding* has given me the incredible opportunity to bring my many ideas to life—ideas that I simply do not have the technical skills to build myself. A huge thank you to Antigravity for making this possible! 😉
