@@ -25,6 +25,9 @@
   },
   "bundle": {
     "active": true,
+    "publisher": "Frank Stellmacher",
+    "shortDescription": "Moderne Rechnungsverwaltung",
+    "longDescription": "Eine moderne, plattformübergreifende Desktop-Anwendung zur Verwaltung von Rechnungen, Kunden und Artikeln - komplett offline und datenschutzfreundlich.",
     "targets": "all",
     "icon": [
       "icons/32x32.png",
