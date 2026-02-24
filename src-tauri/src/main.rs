@@ -4,7 +4,10 @@
 fn main() {
     // Workaround for EGL_BAD_PARAMETER crash in WebKitGTK on Linux (NVIDIA/Wayland)
     #[cfg(target_os = "linux")]
-    std::env::set_var("WEBKIT_DISABLE_DMABUF_RENDERER", "1");
+    {
+        std::env::set_var("WEBKIT_DISABLE_DMABUF_RENDERER", "1");
+        std::env::set_var("WEBKIT_DISABLE_COMPOSITING_MODE", "1");
+    }
 
     rechnung_lib::run()
 }
