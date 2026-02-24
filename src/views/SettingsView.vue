@@ -122,7 +122,7 @@ import { getVersion } from '@tauri-apps/api/app';
 
 const { locale, t } = useI18n();
 
-const language = ref('de');
+const language = ref('en');
 const downloadFolder = ref('');
 const defaultPaymentTerms = ref('14 Tage netto');
 const defaultTaxRate = ref(19);
