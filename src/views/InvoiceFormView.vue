@@ -17,6 +17,7 @@
               <label class="form-label">{{ $t('invoiceForm.seller') }} *</label>
               <select class="form-select" v-model.number="invoice.seller_id" @change="onSellerChange">
                 <option :value="0" disabled>{{ $t('common.choose') }}</option>
+                <option :value="-1" style="font-weight: 600; color: var(--primary-color)">{{ $t('invoiceForm.createNewSeller') }}</option>
                 <option v-for="s in sellers" :key="s.id" :value="s.id">{{ s.name }}</option>
               </select>
             </div>
@@ -24,6 +25,7 @@
               <label class="form-label">{{ $t('invoiceForm.customer') }} *</label>
               <select class="form-select" v-model.number="invoice.customer_id">
                 <option :value="0" disabled>{{ $t('common.choose') }}</option>
+                <option :value="-1" style="font-weight: 600; color: var(--primary-color)">{{ $t('invoiceForm.createNewCustomer') }}</option>
                 <option v-for="c in customers" :key="c.id" :value="c.id">{{ c.name }}</option>
               </select>
             </div>
@@ -117,7 +119,12 @@
                   </div>
                 </td>
                 <td><input class="form-input text-right" v-model.number="item.total_gross" type="number" step="0.01" min="0" @input="recalcFromGross(i)" /></td>
-                <td><button class="btn btn-ghost btn-sm" @click="removeItem(i)">✕</button></td>
+                <td>
+                  <div class="flex gap-1" style="justify-content: flex-end">
+                    <button class="btn btn-ghost btn-sm" v-if="!item.product_id" @click="openProductModal(i)" :title="$t('invoiceForm.saveToCatalog')">💾</button>
+                    <button class="btn btn-ghost btn-sm" @click="removeItem(i)">✕</button>
+                  </div>
+                </td>
               </tr>
             </tbody>
           </table>
@@ -211,6 +218,232 @@
         </div>
       </div>
     </div>
+
+    <!-- Quick Add Customer Modal -->
+    <div v-if="showCustomerModal" class="modal-overlay" @click="showCustomerModal = false">
+      <div class="modal modal-wide" @click.stop>
+        <div class="modal-header">
+          <h2>{{ $t('invoiceForm.quickCustomerTitle') }}</h2>
+          <button class="btn btn-ghost btn-icon" @click="showCustomerModal = false">✕</button>
+        </div>
+        <div class="modal-body">
+          <div class="form-group">
+            <label class="form-label">{{ $t('common.name') }} *</label>
+            <input class="form-input" v-model="newCustomerForm.name" :placeholder="$t('customers.namePlaceholder')" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">{{ $t('common.street') }}</label>
+            <input class="form-input" v-model="newCustomerForm.street" :placeholder="$t('customers.streetPlaceholder')" />
+          </div>
+          <div class="form-row-3">
+            <div class="form-group">
+              <label class="form-label">{{ $t('common.zip') }}</label>
+              <input class="form-input" v-model="newCustomerForm.zip" :placeholder="$t('customers.zipPlaceholder')" />
+            </div>
+            <div class="form-group">
+              <label class="form-label">{{ $t('common.city') }}</label>
+              <input class="form-input" v-model="newCustomerForm.city" :placeholder="$t('customers.cityPlaceholder')" />
+            </div>
+            <div class="form-group">
+              <label class="form-label">{{ $t('common.country') }}</label>
+              <input class="form-input" v-model="newCustomerForm.country" />
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">{{ $t('common.phone') }}</label>
+              <input class="form-input" v-model="newCustomerForm.phone" />
+            </div>
+            <div class="form-group">
+              <label class="form-label">{{ $t('common.email') }}</label>
+              <input class="form-input" v-model="newCustomerForm.email" type="email" />
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">{{ $t('common.notes') }}</label>
+            <textarea class="form-textarea" v-model="newCustomerForm.notes" :placeholder="$t('customers.notesPlaceholder')"></textarea>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-secondary" @click="showCustomerModal = false">{{ $t('common.cancel') }}</button>
+          <button class="btn btn-primary" @click="saveQuickCustomer" :disabled="!newCustomerForm.name">{{ $t('common.save') }}</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Quick Add Seller Modal (Full Form) -->
+    <div v-if="showSellerModal" class="modal-overlay" @click="showSellerModal = false">
+      <div class="modal modal-wide" @click.stop style="max-height: 90vh; overflow-y: auto;">
+        <div class="modal-header">
+          <h2>{{ $t('invoiceForm.quickSellerTitle') }}</h2>
+          <button class="btn btn-ghost btn-icon" @click="showSellerModal = false">✕</button>
+        </div>
+        <div class="modal-body">
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">{{ $t('common.name') }} *</label>
+              <input class="form-input" v-model="newSellerForm.name" :placeholder="$t('sellers.namePlaceholder')" />
+            </div>
+            <div class="form-group">
+              <label class="form-label">{{ $t('sellers.logo') }}</label>
+              <div class="flex items-center gap-2">
+                <div class="logo-preview" @click="selectSellerLogo">
+                  <img v-if="newSellerForm.logo_data" :src="newSellerForm.logo_data" alt="Logo" />
+                  <div v-else class="logo-placeholder">{{ $t('sellers.chooseLogo') }}</div>
+                </div>
+                <button v-if="newSellerForm.logo_data" class="btn btn-ghost btn-sm" @click="newSellerForm.logo_data = ''">{{ $t('sellers.removeLogo') }}</button>
+              </div>
+            </div>
+          </div>
+          <hr style="border-color: var(--border-color); margin: 8px 0 16px" />
+          <div class="form-group">
+            <label class="form-label">{{ $t('common.street') }}</label>
+            <input class="form-input" v-model="newSellerForm.street" :placeholder="$t('customers.streetPlaceholder')" />
+          </div>
+          <div class="form-row-3">
+            <div class="form-group">
+              <label class="form-label">{{ $t('common.zip') }}</label>
+              <input class="form-input" v-model="newSellerForm.zip" :placeholder="$t('customers.zipPlaceholder')" />
+            </div>
+            <div class="form-group">
+              <label class="form-label">{{ $t('common.city') }}</label>
+              <input class="form-input" v-model="newSellerForm.city" :placeholder="$t('customers.cityPlaceholder')" />
+            </div>
+            <div class="form-group">
+              <label class="form-label">{{ $t('common.country') }}</label>
+              <input class="form-input" v-model="newSellerForm.country" />
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">{{ $t('common.phone') }}</label>
+              <input class="form-input" v-model="newSellerForm.phone" />
+            </div>
+            <div class="form-group">
+              <label class="form-label">{{ $t('common.email') }}</label>
+              <input class="form-input" v-model="newSellerForm.email" type="email" />
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">{{ $t('sellers.website') }}</label>
+            <input class="form-input" v-model="newSellerForm.website" placeholder="www.example.de" />
+          </div>
+          <hr style="border-color: var(--border-color); margin: 8px 0 16px" />
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">{{ $t('sellers.taxId') }}</label>
+              <input class="form-input" v-model="newSellerForm.tax_id" placeholder="12/345/67890" />
+            </div>
+            <div class="form-group">
+              <label class="form-label">{{ $t('sellers.vatId') }}</label>
+              <input class="form-input" v-model="newSellerForm.vat_id" placeholder="DE123456789" />
+            </div>
+          </div>
+          <hr style="border-color: var(--border-color); margin: 8px 0 16px" />
+          <div class="form-row-3">
+            <div class="form-group">
+              <label class="form-label">{{ $t('sellers.bank') }}</label>
+              <input class="form-input" v-model="newSellerForm.bank_name" placeholder="Sparkasse" />
+            </div>
+            <div class="form-group">
+              <label class="form-label">{{ $t('sellers.iban') }}</label>
+              <input class="form-input" v-model="newSellerForm.bank_iban" placeholder="DE89 3704 0044 0532 0130 00" />
+            </div>
+            <div class="form-group">
+              <label class="form-label">{{ $t('sellers.bic') }}</label>
+              <input class="form-input" v-model="newSellerForm.bank_bic" placeholder="COBADEFFXXX" />
+            </div>
+          </div>
+          <hr style="border-color: var(--border-color); margin: 8px 0 16px" />
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">{{ $t('sellers.invoicePrefix') }}</label>
+              <input class="form-input" v-model="newSellerForm.invoice_prefix" placeholder="RE" @focus="guessPrefix" />
+              <div class="form-hint">{{ $t('sellers.prefixExample', { prefix: newSellerForm.invoice_prefix || 'RE' }) }}</div>
+            </div>
+            <div class="form-group" style="width: 140px;">
+              <label class="form-label">{{ $t('sellers.color') }}</label>
+              <input class="form-input" type="color" v-model="newSellerForm.color" style="height: 38px; padding: 2px 4px; cursor: pointer;" />
+              <div class="form-hint" style="line-height: 1.2">{{ $t('sellers.colorHint') }}</div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">{{ $t('sellers.nextInvoiceNr') }}</label>
+              <input class="form-input" v-model.number="newSellerForm.next_invoice_number" type="number" min="1" />
+            </div>
+            <div class="form-group">
+              <label class="form-label">{{ $t('sellers.pdfTemplate') }}</label>
+              <select class="form-select" v-model="newSellerForm.pdf_template">
+                <option value="classic">Classic</option>
+                <option value="modern">Modern</option>
+                <option value="minimal">Minimal</option>
+              </select>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-secondary" @click="showSellerModal = false">{{ $t('common.cancel') }}</button>
+          <button class="btn btn-primary" @click="saveQuickSeller" :disabled="!newSellerForm.name">{{ $t('common.save') }}</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Quick Add Product Modal -->
+    <div v-if="showProductModal" class="modal-overlay" @click="showProductModal = false">
+      <div class="modal" @click.stop>
+        <div class="modal-header">
+          <h2>{{ $t('products.newProductTitle') }}</h2>
+          <button class="btn btn-ghost btn-icon" @click="showProductModal = false">✕</button>
+        </div>
+        <div class="modal-body">
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">{{ $t('products.type') }} *</label>
+              <select class="form-select" v-model="newProductForm.type">
+                <option value="product">{{ $t('products.typeProduct') }}</option>
+                <option value="service">{{ $t('products.typeService') }}</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">{{ $t('common.name') }} *</label>
+            <input class="form-input" v-model="newProductForm.name" :placeholder="$t('products.namePlaceholder')" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">{{ $t('common.description') }}</label>
+            <textarea class="form-textarea" v-model="newProductForm.description" rows="2" :placeholder="$t('products.descriptionPlaceholder')"></textarea>
+          </div>
+          <div class="form-row-3">
+            <div class="form-group">
+              <label class="form-label">{{ $t('products.unit') }}</label>
+              <select class="form-select" v-model="newProductForm.unit">
+                <option value="Stk">{{ $t('products.unitPc') }}</option>
+                <option value="Std">{{ $t('products.unitHour') }}</option>
+                <option value="Pausch.">{{ $t('products.unitFlat') }}</option>
+                <option value="kg">{{ $t('products.unitKg') }}</option>
+                <option value="m">{{ $t('products.unitM') }}</option>
+                <option value="Lizenz">{{ $t('products.unitLicense') }}</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">{{ $t('products.netPrice') }} (€) *</label>
+              <input class="form-input" v-model.number="newProductForm.price_net" type="number" step="0.01" min="0" />
+            </div>
+            <div class="form-group">
+              <label class="form-label">{{ $t('products.taxRate') }} (%)</label>
+              <input class="form-input" v-model.number="newProductForm.tax_rate" type="number" step="0.5" min="0" max="100" />
+            </div>
+          </div>
+          <div class="form-group" v-if="newProductForm.type === 'product'">
+            <label class="form-label">{{ $t('products.stock') }}</label>
+            <input class="form-input" v-model.number="newProductForm.stock" type="number" min="0" style="max-width: 150px" />
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-secondary" @click="showProductModal = false">{{ $t('common.cancel') }}</button>
+          <button class="btn btn-primary" @click="confirmSaveProduct" :disabled="!newProductForm.name">{{ $t('common.save') }}</button>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -222,6 +455,7 @@ import {
   getSellers, getCustomers, getProducts, getInvoice,
   createInvoice, updateInvoice, generateInvoiceNumber, getSetting,
   getPaymentsForInvoice, addPayment, deletePayment,
+  createCustomer, createSeller, createProduct,
   type Seller, type Customer, type Product, type Invoice, type InvoiceItem, type Payment
 } from '../services/database';
 import { generateInvoicePdf } from '../utils/pdfGenerator';
@@ -250,6 +484,33 @@ const invoice = ref<Invoice>({
 });
 
 const items = ref<InvoiceItem[]>([]);
+
+// Modals
+const showCustomerModal = ref(false);
+const showSellerModal = ref(false);
+const showProductModal = ref(false);
+const productSaveIndex = ref(-1);
+
+const emptyCustomer = (): Customer => ({
+  name: '', street: '', city: '', zip: '', country: 'Deutschland',
+  phone: '', email: '', notes: ''
+});
+
+const emptySeller = (): Seller => ({
+  name: '', street: '', city: '', zip: '', country: 'Deutschland',
+  phone: '', email: '', website: '', tax_id: '', vat_id: '',
+  bank_name: '', bank_iban: '', bank_bic: '', logo_data: '',
+  invoice_prefix: 'RE', next_invoice_number: 1, pdf_template: 'classic'
+});
+
+const emptyProduct = (): Product => ({
+  seller_id: 0, name: '', description: '', type: 'product',
+  unit: 'Stk', price_net: 0, tax_rate: 19, stock: 0, active: 1
+});
+
+const newCustomerForm = ref<Customer>(emptyCustomer());
+const newSellerForm = ref<Seller>(emptySeller());
+const newProductForm = ref<Product>(emptyProduct());
 
 // Payments
 const payments = ref<Payment[]>([]);
@@ -315,12 +576,26 @@ onMounted(async () => {
 });
 
 async function onSellerChange() {
+  if (invoice.value.seller_id === -1) {
+    invoice.value.seller_id = 0;
+    newSellerForm.value = emptySeller();
+    showSellerModal.value = true;
+    return;
+  }
   if (!isEdit.value && invoice.value.seller_id) {
     try {
       suggestedNumber.value = await peekInvoiceNumber(invoice.value.seller_id);
     } catch (e) { console.error(e); }
   }
 }
+
+watch(() => invoice.value.customer_id, (newVal) => {
+  if (newVal === -1) {
+    invoice.value.customer_id = 0;
+    newCustomerForm.value = emptyCustomer();
+    showCustomerModal.value = true;
+  }
+});
 
 async function peekInvoiceNumber(sellerId: number): Promise<string> {
   const seller = sellers.value.find(s => s.id === sellerId);
@@ -483,4 +758,96 @@ async function removePayment(id: number) {
 }
 
 watch(() => invoice.value.date, calcDueDate);
+
+async function saveQuickCustomer() {
+  if (!newCustomerForm.value.name) return;
+  try {
+    const id = await createCustomer(newCustomerForm.value);
+    customers.value = await getCustomers();
+    invoice.value.customer_id = id;
+    showCustomerModal.value = false;
+    toast.success(t('toast.customerSaved'));
+  } catch (e) { console.error(e); toast.error(t('toast.error')); }
+}
+
+function guessPrefix() {
+  if (newSellerForm.value.name && newSellerForm.value.invoice_prefix === 'RE') {
+    newSellerForm.value.invoice_prefix = newSellerForm.value.name.substring(0, 3).toUpperCase();
+  }
+}
+
+async function selectSellerLogo() {
+  try {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'image/*';
+    input.onchange = (e: Event) => {
+      const file = (e.target as HTMLInputElement).files?.[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = () => {
+        newSellerForm.value.logo_data = reader.result as string;
+      };
+      reader.readAsDataURL(file);
+    };
+    input.click();
+  } catch (e) {
+    console.error('Logo select error:', e);
+  }
+}
+
+async function saveQuickSeller() {
+  if (!newSellerForm.value.name) return;
+  try {
+    const id = await createSeller(newSellerForm.value);
+    sellers.value = await getSellers();
+    invoice.value.seller_id = id;
+    showSellerModal.value = false;
+    toast.success(t('toast.sellerSaved'));
+    onSellerChange();
+  } catch (e) { console.error(e); toast.error(t('toast.error')); }
+}
+
+function openProductModal(index: number) {
+  const item = items.value[index];
+  if (!item) return;
+
+  if (!invoice.value.seller_id) {
+    toast.error(t('invoiceForm.chooseSellerFirst'));
+    return;
+  }
+  
+  productSaveIndex.value = index;
+  newProductForm.value = {
+    seller_id: invoice.value.seller_id,
+    name: item.description || t('invoiceForm.freePosition'),
+    description: '',
+    type: item.unit === 'Std' || item.unit === 'Pausch.' ? 'service' : 'product',
+    unit: item.unit || 'Stk',
+    price_net: item.price_net || 0,
+    tax_rate: item.tax_rate || 19,
+    stock: 0,
+    active: 1
+  };
+  showProductModal.value = true;
+}
+
+async function confirmSaveProduct() {
+  if (!newProductForm.value.name || !newProductForm.value.seller_id) return;
+  try {
+    const id = await createProduct(newProductForm.value);
+    
+    if (productSaveIndex.value >= 0) {
+      items.value[productSaveIndex.value].product_id = id;
+    }
+
+    products.value = await getProducts(); // refresh catalog
+    showProductModal.value = false;
+    toast.success(t('invoiceForm.productSavedToCatalog'));
+  } catch (e) { console.error(e); toast.error(t('toast.error')); }
+}
+
 </script>
+
+<style scoped>
+</style>

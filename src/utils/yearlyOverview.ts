@@ -16,10 +16,16 @@ export async function generateYearlyOverviewPdf(sellerId: number, year: number, 
     const contentWidth = pageWidth - 2 * margin;
     let y = 30;
 
+    // Parse brand color, fallback to default blue
+    const brandColorHex = seller.color || '#3b82f6';
+    const r = parseInt(brandColorHex.slice(1, 3), 16);
+    const g = parseInt(brandColorHex.slice(3, 5), 16);
+    const b = parseInt(brandColorHex.slice(5, 7), 16);
+
     // Header
     doc.setFontSize(20);
     doc.setFont('helvetica', 'bold');
-    doc.setTextColor(59, 130, 246); // Primary blue
+    doc.setTextColor(r, g, b); // Brand color
     doc.text(`Jahresübersicht ${year}`, margin, y);
 
     y += 10;
@@ -69,6 +75,8 @@ export async function generateYearlyOverviewPdf(sellerId: number, year: number, 
             }
 
             const inv = yearlyInvoices[i];
+
+            // Draw alternating row background first BEFORE text
             if (i % 2 === 1) {
                 doc.setFillColor(252, 252, 252);
                 doc.rect(margin, y - 4, contentWidth, 7, 'F');
@@ -78,6 +86,7 @@ export async function generateYearlyOverviewPdf(sellerId: number, year: number, 
             totalTax += inv.total_tax;
             totalGross += inv.total_gross;
 
+            doc.setTextColor(30, 30, 30);
             doc.text(formatDateLocale(inv.date, locale), margin + 2, y);
             doc.text(inv.invoice_number, margin + 30, y);
 
@@ -94,13 +103,13 @@ export async function generateYearlyOverviewPdf(sellerId: number, year: number, 
 
         // Totals line
         y += 2;
-        doc.setDrawColor(150, 150, 150);
-        doc.line(margin + 100, y, margin + 170, y);
+        doc.setDrawColor(200, 200, 200);
+        doc.line(margin + 80, y, margin + 175, y);
         y += 6;
 
         doc.setFont('helvetica', 'bold');
         doc.setFontSize(10);
-        doc.text('Gesamt:', margin + 100, y);
+        doc.text('Gesamt:', margin + 80, y);
         doc.text(formatCurrency(totalNet), margin + 130, y, { align: 'right' });
         doc.text(formatCurrency(totalTax), margin + 150, y, { align: 'right' });
         doc.text(formatCurrency(totalGross), margin + 170, y, { align: 'right' });

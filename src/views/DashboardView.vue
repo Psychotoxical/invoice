@@ -80,7 +80,8 @@
             </thead>
             <tbody>
               <tr v-for="inv in recentInvoices" :key="inv.id"
-                :class="{ 'overdue-row': inv.status === 'overdue' }">
+                :class="{ 'overdue-row': inv.status === 'overdue' }"
+                @dblclick="goToInvoice(inv.id || 0)" style="cursor: pointer">
                 <td>{{ inv.invoice_number }}</td>
                 <td>{{ inv.customer_name }}</td>
                 <td>{{ inv.seller_name }}</td>
@@ -114,10 +115,12 @@ import {
   Chart as ChartJS, CategoryScale, LinearScale, BarElement,
   Title, Tooltip, Legend
 } from 'chart.js';
+import { useRouter } from 'vue-router';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
 const { locale, t } = useI18n();
+const router = useRouter();
 
 const stats = ref<DashboardStats>({
   totalInvoices: 0, openInvoices: 0, paidInvoices: 0,
@@ -191,5 +194,9 @@ function formatCurrency(val: number): string {
 function formatDate(d: string): string {
   if (!d) return '';
   return new Date(d).toLocaleDateString(locale.value === 'de' ? 'de-DE' : 'en-US');
+}
+
+function goToInvoice(id: number) {
+  router.push(`/invoices/${id}/edit`);
 }
 </script>

@@ -17,13 +17,19 @@ export function buildInvoicePdfDoc(invoice: Invoice, seller: Seller, customer: C
     const contentWidth = pageWidth - 2 * margin;
     let y = 20;
 
-    const template = seller.pdf_template || 'classic';
-    const isModern = template === 'modern';
-    const isMinimal = template === 'minimal';
+    const t = i18n.global.t;
+    const isModern = seller.pdf_template === 'modern';
+    const isMinimal = seller.pdf_template === 'minimal';
+
+    // Parse brand color, fallback to default blue
+    const brandColorHex = seller.color || '#3b82f6';
+    const r = parseInt(brandColorHex.slice(1, 3), 16);
+    const g = parseInt(brandColorHex.slice(3, 5), 16);
+    const b = parseInt(brandColorHex.slice(5, 7), 16);
 
     // Modern top decorative bar
     if (isModern) {
-        doc.setFillColor(59, 130, 246); // Blue-500
+        doc.setFillColor(r, g, b); // Blue-500
         doc.rect(0, 0, pageWidth, 6, 'F');
         y += 6;
     }
@@ -62,7 +68,7 @@ export function buildInvoicePdfDoc(invoice: Invoice, seller: Seller, customer: C
     doc.setFontSize(6);
     doc.setTextColor(150, 150, 150);
     doc.text(`${seller.name} · ${seller.street} · ${seller.zip} ${seller.city}`, margin, y);
-    y += 5;
+    y += 8;
 
     // ==================== RECIPIENT ====================
     doc.setFontSize(11);
@@ -85,7 +91,7 @@ export function buildInvoicePdfDoc(invoice: Invoice, seller: Seller, customer: C
     doc.setFontSize(18);
     doc.setFont('helvetica', 'bold');
     if (isModern) {
-        doc.setTextColor(59, 130, 246);
+        doc.setTextColor(r, g, b);
     } else {
         doc.setTextColor(0, 0, 0);
     }
@@ -118,16 +124,16 @@ export function buildInvoicePdfDoc(invoice: Invoice, seller: Seller, customer: C
     const colX = {
         pos: margin,
         desc: margin + 10,
-        qty: margin + contentWidth - 85,
-        unit: margin + contentWidth - 65,
-        price: margin + contentWidth - 45,
-        tax: margin + contentWidth - 20,
+        qty: margin + contentWidth - 90,
+        unit: margin + contentWidth - 75,
+        price: margin + contentWidth - 42,
+        tax: margin + contentWidth - 22,
         total: margin + contentWidth,
     };
 
     // Table header
     if (isModern) {
-        doc.setFillColor(59, 130, 246);
+        doc.setFillColor(r, g, b);
         doc.setTextColor(255, 255, 255);
     } else if (isMinimal) {
         doc.setFillColor(255, 255, 255);
@@ -180,8 +186,9 @@ export function buildInvoicePdfDoc(invoice: Invoice, seller: Seller, customer: C
         doc.text(String(item.position), colX.pos, y);
 
         // Handle long descriptions
-        const descLines = doc.splitTextToSize(item.description, 70);
-        doc.text(descLines[0], colX.desc, y);
+        const maxDescWidth = colX.qty - colX.desc - 5; // approx 65mm
+        const descLines = wrapText(doc, item.description, maxDescWidth);
+        doc.text(descLines[0] || '', colX.desc, y);
 
         doc.text(formatNumber(item.quantity), colX.qty, y, { align: 'right' });
         doc.text(item.unit, colX.unit, y);
@@ -415,4 +422,44 @@ function formatCurrency(val: number): string {
 function formatNumber(val: number): string {
     if (val === Math.floor(val)) return String(val);
     return new Intl.NumberFormat('de-DE', { minimumFractionDigits: 1, maximumFractionDigits: 2 }).format(val);
+}
+
+function wrapText(doc: jsPDF, text: string, maxWidth: number): string[] {
+    if (!text) return [];
+    const words = text.split(/\s+/);
+    const lines: string[] = [];
+    let currentLine = '';
+
+    for (const word of words) {
+        if (doc.getTextWidth(word) > maxWidth) {
+            // Word is too long, we need to split the word itself
+            if (currentLine) {
+                lines.push(currentLine.trimEnd());
+                currentLine = '';
+            }
+            let currentWordPart = '';
+            for (let i = 0; i < word.length; i++) {
+                const char = word[i];
+                if (doc.getTextWidth(currentWordPart + char) > maxWidth) {
+                    lines.push(currentWordPart);
+                    currentWordPart = char;
+                } else {
+                    currentWordPart += char;
+                }
+            }
+            currentLine = currentWordPart + ' ';
+        } else {
+            const testLine = currentLine + word + ' ';
+            if (doc.getTextWidth(testLine) > maxWidth) {
+                lines.push(currentLine.trimEnd());
+                currentLine = word + ' ';
+            } else {
+                currentLine = testLine;
+            }
+        }
+    }
+    if (currentLine.trimEnd()) {
+        lines.push(currentLine.trimEnd());
+    }
+    return lines;
 }

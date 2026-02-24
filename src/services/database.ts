@@ -26,10 +26,11 @@ export interface Seller {
   bank_name: string;
   bank_iban: string;
   bank_bic: string;
-  logo_data: string;
   invoice_prefix: string;
   next_invoice_number: number;
-  pdf_template: string;
+  logo_data?: string;
+  pdf_template?: string;
+  color?: string;
   created_at?: string;
 }
 
@@ -47,19 +48,27 @@ export async function getSeller(id: number): Promise<Seller | null> {
 export async function createSeller(s: Seller): Promise<number> {
   const d = await getDb();
   const result = await d.execute(
-    `INSERT INTO sellers (name, street, city, zip, country, phone, email, website, tax_id, vat_id, bank_name, bank_iban, bank_bic, logo_data, invoice_prefix, next_invoice_number, pdf_template)
-     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17)`,
-    [s.name, s.street, s.city, s.zip, s.country, s.phone, s.email, s.website, s.tax_id, s.vat_id, s.bank_name, s.bank_iban, s.bank_bic, s.logo_data, s.invoice_prefix, s.next_invoice_number, s.pdf_template || 'classic']
+    `INSERT INTO sellers (name, street, city, zip, country, phone, email, website, tax_id, vat_id, bank_name, bank_iban, bank_bic, logo_data, invoice_prefix, next_invoice_number, pdf_template, color)
+     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18)`,
+    [s.name, s.street, s.city, s.zip, s.country, s.phone, s.email, s.website, s.tax_id, s.vat_id, s.bank_name, s.bank_iban, s.bank_bic, s.logo_data || '', s.invoice_prefix, s.next_invoice_number, s.pdf_template || 'classic', s.color || '#3b82f6']
   );
   return result.lastInsertId || 0;
 }
 
+export function emptySeller(): Seller {
+  return {
+    name: '', street: '', city: '', zip: '', country: 'Deutschland', phone: '', email: '', website: '',
+    tax_id: '', vat_id: '', bank_name: '', bank_iban: '', bank_bic: '', invoice_prefix: 'RE', next_invoice_number: 1, logo_data: '', pdf_template: 'classic', color: '#3b82f6'
+  };
+}
+
 export async function updateSeller(s: Seller): Promise<void> {
-  const d = await getDb();
-  await d.execute(
-    `UPDATE sellers SET name=$1, street=$2, city=$3, zip=$4, country=$5, phone=$6, email=$7, website=$8, tax_id=$9, vat_id=$10, bank_name=$11, bank_iban=$12, bank_bic=$13, logo_data=$14, invoice_prefix=$15, next_invoice_number=$16
-     WHERE id=$17`,
-    [s.name, s.street, s.city, s.zip, s.country, s.phone, s.email, s.website, s.tax_id, s.vat_id, s.bank_name, s.bank_iban, s.bank_bic, s.logo_data, s.invoice_prefix, s.next_invoice_number, s.id]
+  if (!s.id) throw new Error('Seller ID missing');
+  const db = await getDb();
+  await db.execute(
+    `UPDATE sellers SET name=$1, street=$2, city=$3, zip=$4, country=$5, phone=$6, email=$7, website=$8, tax_id=$9, vat_id=$10, bank_name=$11, bank_iban=$12, bank_bic=$13, invoice_prefix=$14, next_invoice_number=$15, logo_data=$16, pdf_template=$17, color=$18
+     WHERE id=$19`,
+    [s.name, s.street, s.city, s.zip, s.country, s.phone, s.email, s.website, s.tax_id, s.vat_id, s.bank_name, s.bank_iban, s.bank_bic, s.invoice_prefix, s.next_invoice_number, s.logo_data || '', s.pdf_template || 'classic', s.color || '#3b82f6', s.id]
   );
 }
 

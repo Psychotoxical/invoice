@@ -1283,6 +1283,7 @@ tr.drag-over {
 }
 
 .top-customer-name {
+    color: var(--text-primary);
     font-weight: 600;
     font-size: var(--font-size-sm);
     white-space: nowrap;

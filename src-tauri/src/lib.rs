@@ -119,6 +119,14 @@ pub fn run() {
             ",
             kind: MigrationKind::Up,
         },
+        Migration {
+            version: 3,
+            description: "add brand color to sellers",
+            sql: "
+                ALTER TABLE sellers ADD COLUMN color TEXT DEFAULT '#3b82f6';
+            ",
+            kind: MigrationKind::Up,
+        },
     ];
 
     tauri::Builder::default()

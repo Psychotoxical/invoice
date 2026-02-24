@@ -151,6 +151,11 @@
               <input class="form-input" v-model="form.invoice_prefix" placeholder="RE" />
               <div class="form-hint">{{ $t('sellers.prefixExample', { prefix: form.invoice_prefix || 'RE' }) }}</div>
             </div>
+            <div class="form-group" style="width: 140px;">
+              <label class="form-label">{{ $t('sellers.color') }}</label>
+              <input class="form-input" type="color" v-model="form.color" style="height: 38px; padding: 2px 4px; cursor: pointer;" />
+              <div class="form-hint" style="line-height: 1.2">{{ $t('sellers.colorHint') }}</div>
+            </div>
             <div class="form-group">
               <label class="form-label">{{ $t('sellers.nextInvoiceNr') }}</label>
               <input class="form-input" v-model.number="form.next_invoice_number" type="number" min="1" />
