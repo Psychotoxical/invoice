@@ -92,10 +92,17 @@
       <div class="card mb-4">
         <div class="card-header"><h2>{{ $t('settings.about') }}</h2></div>
         <div class="card-body">
-          <div style="display: flex; flex-direction: column; gap: 4px; font-size: var(--font-size-sm); color: var(--text-secondary)">
+          <div style="display: flex; flex-direction: column; gap: 8px; font-size: var(--font-size-sm); color: var(--text-secondary)">
             <div><strong style="color: var(--text-primary)">{{ $t('app.title') }}</strong> – {{ $t('app.subtitle') }}</div>
-            <div>{{ $t('settings.version') }} {{ appVersion }}</div>
-            <div>{{ $t('settings.copyright') }}</div>
+            <div>
+              {{ $t('settings.aboutDescription1') }}<br>
+              {{ $t('settings.aboutDescription2') }}
+            </div>
+            <div style="font-style: italic;">{{ $t('settings.vibecoded') }}</div>
+            <div>
+              {{ $t('settings.copyright') }}<br>
+              {{ $t('settings.version') }}: {{ appVersion }}
+            </div>
           </div>
         </div>
       </div>
