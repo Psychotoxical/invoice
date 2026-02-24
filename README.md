@@ -47,4 +47,8 @@ npm run tauri build
 
 ## 📜 License
 
-© 2026 Frank Stellmacher. All rights reserved.
+This project is licensed under the **MIT License**. See the `LICENSE` file for details.
+
+---
+
+*Note: This application was entirely **vibecoded**.*

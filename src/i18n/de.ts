@@ -251,7 +251,7 @@ export default {
         importSuccess: '✓ Backup erfolgreich importiert! Bitte App neu starten.',
         about: 'Über die App',
         version: 'Version',
-        copyright: '© 2026 Frank Stellmacher',
+        copyright: 'Open Source (MIT-Lizenz)',
         language: 'Sprache',
         languageHint: 'Wähle die App-Sprache',
     },

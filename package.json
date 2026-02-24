@@ -4,7 +4,8 @@
   "version": "1.0.12",
   "type": "module",
   "description": "A modern, offline-first desktop application for managing invoices, customers, and products.",
-  "author": "Frank Stellmacher",
+  "author": "Open Source",
+  "license": "MIT",
   "repository": {
     "type": "git",
     "url": "https://github.com/Psychotoxical/invoice.git"
