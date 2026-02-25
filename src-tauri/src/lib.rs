@@ -13,6 +13,12 @@ pub fn run() {
                     street TEXT DEFAULT '',
                     city TEXT DEFAULT '',
                     zip TEXT DEFAULT '',
+                    first_name TEXT DEFAULT '',
+                    last_name TEXT DEFAULT '',
+                    default_payment_terms TEXT DEFAULT '',
+                    default_tax_rate REAL DEFAULT NULL,
+                    currency TEXT DEFAULT '',
+                    default_note TEXT DEFAULT '',
                     country TEXT DEFAULT 'Deutschland',
                     phone TEXT DEFAULT '',
                     email TEXT DEFAULT '',
@@ -36,6 +42,12 @@ pub fn run() {
                     street TEXT DEFAULT '',
                     city TEXT DEFAULT '',
                     zip TEXT DEFAULT '',
+                    first_name TEXT DEFAULT '',
+                    last_name TEXT DEFAULT '',
+                    default_payment_terms TEXT DEFAULT '',
+                    default_tax_rate REAL DEFAULT NULL,
+                    currency TEXT DEFAULT '',
+                    default_note TEXT DEFAULT '',
                     country TEXT DEFAULT 'Deutschland',
                     phone TEXT DEFAULT '',
                     email TEXT DEFAULT '',
@@ -126,26 +138,6 @@ pub fn run() {
             description: "add brand color to sellers",
             sql: "
                 ALTER TABLE sellers ADD COLUMN color TEXT DEFAULT '#3b82f6';
-            ",
-            kind: MigrationKind::Up,
-        },
-        Migration {
-            version: 4,
-            description: "add first_name and last_name to sellers safely",
-            sql: "
-                ALTER TABLE sellers ADD COLUMN first_name TEXT DEFAULT '';
-                ALTER TABLE sellers ADD COLUMN last_name TEXT DEFAULT '';
-            ",
-            kind: MigrationKind::Up,
-        },
-        Migration {
-            version: 5,
-            description: "add seller specific invoice defaults",
-            sql: "
-                ALTER TABLE sellers ADD COLUMN default_payment_terms TEXT DEFAULT '';
-                ALTER TABLE sellers ADD COLUMN default_tax_rate REAL DEFAULT NULL;
-                ALTER TABLE sellers ADD COLUMN currency TEXT DEFAULT '';
-                ALTER TABLE sellers ADD COLUMN default_note TEXT DEFAULT '';
             ",
             kind: MigrationKind::Up,
         },

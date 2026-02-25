@@ -5,6 +5,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.22] - 2026-02-25
+
+### Fixed
+- **Fresh Install Database Error**: Fixed a critical issue where the app failed to initialize the database schema on fresh installations due to unsupported SQL migration statements, which prevented users from saving Sellers.
+
 ## [1.0.21] - 2026-02-25
 
 ### Added

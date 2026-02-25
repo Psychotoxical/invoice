@@ -1,12 +1,33 @@
 import Database from '@tauri-apps/plugin-sql';
 
-let db: Database | null = null;
+let dbInstance: Database | null = null;
 
 export async function getDb(): Promise<Database> {
-  if (!db) {
-    db = await Database.load('sqlite:vibebill.db');
+  if (!dbInstance) {
+    dbInstance = await Database.load('sqlite:vibebill.db');
+    await runJsMigrations(dbInstance);
   }
-  return db;
+  return dbInstance;
+}
+
+// Ensure columns exist, ignoring errors if they're already present
+// This safely patches databases where Tauri migrations failed or were manually patched
+async function runJsMigrations(db: Database) {
+  const columns = [
+    'first_name TEXT DEFAULT ""',
+    'last_name TEXT DEFAULT ""',
+    'default_payment_terms TEXT DEFAULT ""',
+    'default_tax_rate REAL DEFAULT NULL',
+    'currency TEXT DEFAULT ""',
+    'default_note TEXT DEFAULT ""'
+  ];
+  for (const col of columns) {
+    try {
+      await db.execute(`ALTER TABLE sellers ADD COLUMN ${col}`);
+    } catch (e) {
+      // Ignore "duplicate column name" errors
+    }
+  }
 }
 
 // ==================== SELLERS ====================
