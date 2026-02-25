@@ -469,7 +469,7 @@ import {
 import { generateInvoicePdf } from '../utils/pdfGenerator';
 import { useToast } from '../composables/useToast';
 
-const { locale, t } = useI18n();
+const { locale, t } = useI18n({ useScope: 'global' });
 const route = useRoute();
 const router = useRouter();
 const toast = useToast();

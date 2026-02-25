@@ -107,7 +107,7 @@ import { generateInvoicePdf } from '../utils/pdfGenerator';
 import { exportInvoicesCsv } from '../utils/csvExport';
 import { useToast } from '../composables/useToast';
 
-const { locale, t } = useI18n();
+const { locale, t } = useI18n({ useScope: 'global' });
 const router = useRouter();
 const toast = useToast();
 const invoices = ref<Invoice[]>([]);

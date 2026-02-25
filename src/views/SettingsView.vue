@@ -120,7 +120,7 @@ import { copyFile } from '@tauri-apps/plugin-fs';
 import { appConfigDir, join } from '@tauri-apps/api/path';
 import { getVersion } from '@tauri-apps/api/app';
 
-const { locale, t } = useI18n();
+const { locale, t } = useI18n({ useScope: 'global' });
 
 const language = ref('en');
 const downloadFolder = ref('');
@@ -133,8 +133,11 @@ const appVersion = ref('');
 
 onMounted(async () => {
   try {
-    const lang = await getSetting('language');
-    if (lang) language.value = lang;
+    const lang = localStorage.getItem('language') || await getSetting('language');
+    if (lang) {
+      language.value = lang;
+      localStorage.setItem('language', lang); // sync back
+    }
     downloadFolder.value = await getSetting('download_folder');
     const pt = await getSetting('default_payment_terms');
     if (pt) defaultPaymentTerms.value = pt;
@@ -147,13 +150,14 @@ onMounted(async () => {
     try {
       appVersion.value = await getVersion();
     } catch {
-      appVersion.value = '1.0.18';
+      appVersion.value = '1.0.19';
     }
   } catch (e) { console.error(e); }
 });
 
 async function changeLanguage() {
   locale.value = language.value;
+  localStorage.setItem('language', language.value);
   await saveSetting('language', language.value);
 }
 

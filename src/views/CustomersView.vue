@@ -127,7 +127,7 @@ import { useI18n } from 'vue-i18n';
 import { getCustomers, createCustomer, updateCustomer, deleteCustomer, type Customer } from '../services/database';
 import { useToast } from '../composables/useToast';
 
-const { t } = useI18n();
+const { t } = useI18n({ useScope: 'global' });
 const toast = useToast();
 
 const customers = ref<Customer[]>([]);

@@ -228,7 +228,7 @@ import { useToast } from '../composables/useToast';
 import { generateYearlyOverviewPdf } from '../utils/yearlyOverview';
 import { previewPdfTemplate } from '../utils/pdfGenerator';
 
-const { t } = useI18n();
+const { t } = useI18n({ useScope: 'global' });
 const toast = useToast();
 
 const sellers = ref<Seller[]>([]);

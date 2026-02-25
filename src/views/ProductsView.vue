@@ -158,7 +158,7 @@ import { useI18n } from 'vue-i18n';
 import { getProducts, createProduct, updateProduct, deleteProduct, getSellers, type Product, type Seller } from '../services/database';
 import { useToast } from '../composables/useToast';
 
-const { locale, t } = useI18n();
+const { locale, t } = useI18n({ useScope: 'global' });
 const toast = useToast();
 const products = ref<Product[]>([]);
 const sellers = ref<Seller[]>([]);

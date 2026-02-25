@@ -42,21 +42,18 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
-import { useI18n } from 'vue-i18n';
+
 import { getSetting, setSetting } from './services/database';
 import ToastContainer from './components/ToastContainer.vue';
 
-const { locale } = useI18n();
 const theme = ref('light');
 
 onMounted(async () => {
   try {
     const saved = await getSetting('theme');
     if (saved) theme.value = saved;
-    const lang = await getSetting('language');
-    if (lang) locale.value = lang;
-  } catch {
-    // DB not ready in browser dev mode
+  } catch (e) {
+    console.warn("Could not load theme setting on startup", e);
   }
 });
 

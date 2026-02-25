@@ -119,7 +119,7 @@ import { useRouter } from 'vue-router';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
-const { locale, t } = useI18n();
+const { locale, t } = useI18n({ useScope: 'global' });
 const router = useRouter();
 
 const stats = ref<DashboardStats>({
