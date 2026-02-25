@@ -1,7 +1,7 @@
 export default {
     // App / Sidebar
     app: {
-        title: 'Rechnung',
+        title: 'VibeBill',
         subtitle: 'Rechnungsverwaltung',
         lightTheme: 'Helles Theme',
         darkTheme: 'Dunkles Theme',

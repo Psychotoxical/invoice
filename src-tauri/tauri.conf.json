@@ -1,8 +1,8 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
-  "productName": "Rechnung",
+  "productName": "VibeBill",
   "version": "1.0.16",
-  "identifier": "de.stelle.rechnung",
+  "identifier": "de.stelle.vibebill",
   "build": {
     "beforeDevCommand": "npm run dev",
     "devUrl": "http://localhost:1420",
@@ -12,7 +12,7 @@
   "app": {
     "windows": [
       {
-        "title": "Rechnung",
+        "title": "VibeBill",
         "width": 1200,
         "height": 800,
         "minWidth": 900,
