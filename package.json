@@ -1,7 +1,7 @@
 {
   "name": "rechnung",
   "private": true,
-  "version": "1.0.15.1",
+  "version": "1.0.16",
   "type": "module",
   "description": "A modern, offline-first desktop application for managing invoices, customers, and products.",
   "author": "Open Source",
