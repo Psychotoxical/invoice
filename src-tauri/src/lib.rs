@@ -138,6 +138,17 @@ pub fn run() {
             ",
             kind: MigrationKind::Up,
         },
+        Migration {
+            version: 5,
+            description: "add seller specific invoice defaults",
+            sql: "
+                ALTER TABLE sellers ADD COLUMN default_payment_terms TEXT DEFAULT '';
+                ALTER TABLE sellers ADD COLUMN default_tax_rate REAL DEFAULT NULL;
+                ALTER TABLE sellers ADD COLUMN currency TEXT DEFAULT '';
+                ALTER TABLE sellers ADD COLUMN default_note TEXT DEFAULT '';
+            ",
+            kind: MigrationKind::Up,
+        },
     ];
 
     tauri::Builder::default()

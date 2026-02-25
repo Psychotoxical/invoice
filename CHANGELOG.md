@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.21] - 2026-02-25
+
+### Added
+- **Seller Invoice Defaults**: Invoices now support default payment terms, tax rates, currencies, and notes configurable *per seller*, rather than globally.
+- **Improved PDF Logo Scaling**: The invoice logo no longer stretches incorrectly when exporting to PDF.
+- **Detailed About Info**: Updated the settings page with a longer, more personal statement about the motivation behind the app and its "vibecoded" origins.
+
 ## [1.0.20] - 2026-02-25
 
 ### Fixed

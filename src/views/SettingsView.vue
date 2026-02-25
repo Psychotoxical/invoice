@@ -35,44 +35,7 @@
         </div>
       </div>
 
-      <!-- Standard-Werte für Rechnungen -->
-      <div class="card mb-4">
-        <div class="card-header"><h2>{{ $t('settings.invoiceDefaults') }}</h2></div>
-        <div class="card-body">
-          <div class="form-row-3">
-            <div class="form-group">
-              <label class="form-label">{{ $t('settings.defaultPaymentTerms') }}</label>
-              <select class="form-select" v-model="defaultPaymentTerms" @change="saveSetting('default_payment_terms', defaultPaymentTerms)">
-                <option value="Sofort fällig">{{ $t('invoiceForm.paymentImmediate') }}</option>
-                <option value="7 Tage netto">{{ $t('invoiceForm.payment7') }}</option>
-                <option value="14 Tage netto">{{ $t('invoiceForm.payment14') }}</option>
-                <option value="30 Tage netto">{{ $t('invoiceForm.payment30') }}</option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label class="form-label">{{ $t('settings.defaultVat') }} (%)</label>
-              <input class="form-input" v-model.number="defaultTaxRate" type="number" step="0.5" min="0" max="100" style="max-width: 120px"
-                @change="saveSetting('default_tax_rate', String(defaultTaxRate))" />
-            </div>
-            <div class="form-group">
-              <label class="form-label">{{ $t('settings.currency') }}</label>
-              <select class="form-select" v-model="currency" @change="saveSetting('currency', currency)">
-                <option value="EUR">EUR (€)</option>
-                <option value="USD">USD ($)</option>
-                <option value="GBP">GBP (£)</option>
-                <option value="CHF">CHF</option>
-              </select>
-            </div>
-          </div>
-          <div class="form-group">
-            <label class="form-label">{{ $t('settings.defaultNote') }}</label>
-            <textarea class="form-textarea" v-model="defaultNote" rows="2"
-              :placeholder="$t('settings.defaultNotePlaceholder')"
-              @blur="saveSetting('default_note', defaultNote)"></textarea>
-            <div class="form-hint">{{ $t('settings.defaultNoteHint') }}</div>
-          </div>
-        </div>
-      </div>
+
 
       <!-- Datenbank -->
       <div class="card mb-4">
@@ -98,7 +61,7 @@
               {{ $t('settings.aboutDescription1') }}<br>
               {{ $t('settings.aboutDescription2') }}
             </div>
-            <div style="font-style: italic;">{{ $t('settings.vibecoded') }}</div>
+            <div style="font-style: italic; white-space: pre-wrap; margin: 8px 0;">{{ $t('settings.vibecoded') }}</div>
             <div>
               {{ $t('settings.copyright') }}<br>
               {{ $t('settings.version') }}: {{ appVersion }}
@@ -124,10 +87,6 @@ const { locale, t } = useI18n({ useScope: 'global' });
 
 const language = ref('en');
 const downloadFolder = ref('');
-const defaultPaymentTerms = ref('14 Tage netto');
-const defaultTaxRate = ref(19);
-const currency = ref('EUR');
-const defaultNote = ref('');
 const backupMessage = ref('');
 const appVersion = ref('');
 
@@ -139,13 +98,6 @@ onMounted(async () => {
       localStorage.setItem('language', lang); // sync back
     }
     downloadFolder.value = await getSetting('download_folder');
-    const pt = await getSetting('default_payment_terms');
-    if (pt) defaultPaymentTerms.value = pt;
-    const tr = await getSetting('default_tax_rate');
-    if (tr) defaultTaxRate.value = Number(tr);
-    const cur = await getSetting('currency');
-    if (cur) currency.value = cur;
-    defaultNote.value = await getSetting('default_note');
     
     try {
       appVersion.value = await getVersion();

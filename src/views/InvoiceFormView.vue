@@ -461,7 +461,7 @@ import { useRoute, useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import {
   getSellers, getCustomers, getProducts, getInvoice,
-  createInvoice, updateInvoice, generateInvoiceNumber, getSetting,
+  createInvoice, updateInvoice, generateInvoiceNumber,
   getPaymentsForInvoice, addPayment, deletePayment,
   createCustomer, createSeller, createProduct,
   type Seller, type Customer, type Product, type Invoice, type InvoiceItem, type Payment
@@ -484,6 +484,7 @@ const products = ref<Product[]>([]);
 const selectedProduct = ref(0);
 const suggestedNumber = ref('');
 const defaultTaxRate = ref(19);
+const currency = ref('EUR');
 
 const invoice = ref<Invoice>({
   seller_id: 0, customer_id: 0, invoice_number: '', date: new Date().toISOString().split('T')[0],
@@ -571,13 +572,7 @@ onMounted(async () => {
         payments.value = await getPaymentsForInvoice(inv.id!);
       }
     } else {
-      // Load defaults from settings
-      const pt = await getSetting('default_payment_terms');
-      if (pt) invoice.value.payment_terms = pt;
-      const tr = await getSetting('default_tax_rate');
-      if (tr) defaultTaxRate.value = Number(tr);
-      const dn = await getSetting('default_note');
-      if (dn) invoice.value.notes = dn;
+      // Default fallback
       calcDueDate();
     }
   } catch (e) { console.error(e); }
@@ -590,9 +585,31 @@ async function onSellerChange() {
     showSellerModal.value = true;
     return;
   }
+  
+  const seller = sellers.value.find(s => s.id === invoice.value.seller_id);
+  if (seller) {
+    if (seller.default_tax_rate !== null && seller.default_tax_rate !== undefined) {
+      defaultTaxRate.value = seller.default_tax_rate;
+    }
+    if (seller.currency) {
+      currency.value = seller.currency;
+    }
+  }
+  
   if (!isEdit.value && invoice.value.seller_id) {
     try {
       suggestedNumber.value = await peekInvoiceNumber(invoice.value.seller_id);
+      
+      // Apply seller defaults to the new invoice
+      if (seller) {
+        if (seller.default_payment_terms) {
+          invoice.value.payment_terms = seller.default_payment_terms;
+        }
+        if (seller.default_note) {
+          invoice.value.notes = seller.default_note;
+        }
+        calcDueDate();
+      }
     } catch (e) { console.error(e); }
   }
 }
@@ -732,7 +749,7 @@ async function exportPdf() {
 }
 
 function formatCurrency(val: number): string {
-  return new Intl.NumberFormat(locale.value === 'de' ? 'de-DE' : 'en-US', { style: 'currency', currency: 'EUR' }).format(val);
+  return new Intl.NumberFormat(locale.value === 'de' ? 'de-DE' : 'en-US', { style: 'currency', currency: currency.value || 'EUR' }).format(val);
 }
 
 function formatDate(d: string): string {

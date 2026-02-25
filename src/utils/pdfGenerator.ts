@@ -38,7 +38,19 @@ export function buildInvoicePdfDoc(invoice: Invoice, seller: Seller, customer: C
     // Logo (left)
     if (seller.logo_data) {
         try {
-            doc.addImage(seller.logo_data, 'PNG', margin, y, 40, 20);
+            const props = doc.getImageProperties(seller.logo_data);
+            const maxW = 40;
+            const maxH = 20;
+
+            let finalW = maxW;
+            let finalH = maxH;
+            if (props && props.width && props.height) {
+                const ratio = Math.min(maxW / props.width, maxH / props.height);
+                finalW = props.width * ratio;
+                finalH = props.height * ratio;
+            }
+
+            doc.addImage(seller.logo_data, 'PNG', margin, y, finalW, finalH);
         } catch (e) {
             // if image fails, skip
         }

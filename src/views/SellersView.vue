@@ -180,6 +180,39 @@
               </div>
             </div>
           </div>
+          <hr style="border-color: var(--border-color); margin: 8px 0 16px" />
+          <h3 style="margin-top: 0; margin-bottom: 12px; font-size: 14px; color: var(--text-primary)">{{ $t('settings.invoiceDefaults') }}</h3>
+          <div class="form-row-3">
+            <div class="form-group">
+              <label class="form-label">{{ $t('settings.defaultPaymentTerms') }}</label>
+              <select class="form-select" v-model="form.default_payment_terms">
+                <option value="">{{ $t('common.choose') || '—' }}</option>
+                <option value="Sofort fällig">{{ $t('invoiceForm.paymentImmediate') }}</option>
+                <option value="7 Tage netto">{{ $t('invoiceForm.payment7') }}</option>
+                <option value="14 Tage netto">{{ $t('invoiceForm.payment14') }}</option>
+                <option value="30 Tage netto">{{ $t('invoiceForm.payment30') }}</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">{{ $t('settings.defaultVat') }} (%)</label>
+              <input class="form-input" v-model.number="form.default_tax_rate" type="number" step="0.5" min="0" max="100" />
+            </div>
+            <div class="form-group">
+              <label class="form-label">{{ $t('settings.currency') }}</label>
+              <select class="form-select" v-model="form.currency">
+                <option value="">—</option>
+                <option value="EUR">EUR (€)</option>
+                <option value="USD">USD ($)</option>
+                <option value="GBP">GBP (£)</option>
+                <option value="CHF">CHF</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">{{ $t('settings.defaultNote') }}</label>
+            <textarea class="form-textarea" v-model="form.default_note" rows="2"
+              :placeholder="$t('settings.defaultNotePlaceholder')"></textarea>
+          </div>
         </div>
         <div class="modal-footer">
           <button class="btn btn-secondary" @click="showModal = false">{{ $t('common.cancel') }}</button>
@@ -241,7 +274,8 @@ const emptyForm = (): Seller => ({
   name: '', first_name: '', last_name: '', street: '', city: '', zip: '', country: 'Deutschland',
   phone: '', email: '', website: '', tax_id: '', vat_id: '',
   bank_name: '', bank_iban: '', bank_bic: '', logo_data: '',
-  invoice_prefix: 'RE', next_invoice_number: 1, pdf_template: 'classic'
+  invoice_prefix: 'RE', next_invoice_number: 1, pdf_template: 'classic',
+  default_payment_terms: '', default_tax_rate: null, currency: 'EUR', default_note: ''
 });
 
 const form = ref<Seller>(emptyForm());
