@@ -1,7 +1,7 @@
 {
   "name": "vibebill",
   "private": true,
-  "version": "1.0.16",
+  "version": "1.0.17",
   "type": "module",
   "description": "A modern, offline-first desktop application for managing invoices, customers, and products.",
   "author": "Open Source",

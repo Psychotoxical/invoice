@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.17] - 2026-02-25
+
+### Changed
+- **Rebranding**: Renamed the application from "Rechnung" to "VibeBill" for a more modern and international feel.
+- **App Icon**: Trimmed unnecessary transparent borders from the application icon to make it appear larger and clearer in the taskbar and dock.
+
 ## [1.0.16] - 2026-02-25
 
 ### Fixed
