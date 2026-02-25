@@ -174,10 +174,10 @@ async function pickFolder() {
 async function exportDb() {
   try {
     const dataDir = await appConfigDir();
-    const dbPath = await join(dataDir, 'rechnung.db');
+    const dbPath = await join(dataDir, 'vibebill.db');
     const now = new Date();
     const ts = `${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, '0')}${String(now.getDate()).padStart(2, '0')}_${String(now.getHours()).padStart(2, '0')}${String(now.getMinutes()).padStart(2, '0')}`;
-    const defaultName = `rechnung_backup_${ts}.db`;
+    const defaultName = `vibebill_backup_${ts}.db`;
 
     const dest = await save({
       defaultPath: defaultName,
@@ -203,7 +203,7 @@ async function importDb() {
     });
     if (selected && typeof selected === 'string') {
       const dataDir = await appConfigDir();
-      const dbPath = await join(dataDir, 'rechnung.db');
+      const dbPath = await join(dataDir, 'vibebill.db');
       await copyFile(selected, dbPath);
       backupMessage.value = t('settings.importSuccess');
     }
