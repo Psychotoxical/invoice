@@ -131,7 +131,7 @@ pub fn run() {
         },
         Migration {
             version: 4,
-            description: "add first_name and last_name to sellers",
+            description: "add first_name and last_name to sellers safely",
             sql: "
                 ALTER TABLE sellers ADD COLUMN first_name TEXT DEFAULT '';
                 ALTER TABLE sellers ADD COLUMN last_name TEXT DEFAULT '';
