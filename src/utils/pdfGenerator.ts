@@ -121,14 +121,15 @@ export function buildInvoicePdfDoc(invoice: Invoice, seller: Seller, customer: C
 
     // ==================== ITEMS TABLE ====================
     const items = invoice.items || [];
+    const pad = 2; // padding so text doesn't touch the colored row edges
     const colX = {
-        pos: margin,
-        desc: margin + 10,
+        pos: margin + pad,
+        desc: margin + 12,
         qty: margin + contentWidth - 90,
         unit: margin + contentWidth - 75,
         price: margin + contentWidth - 42,
         tax: margin + contentWidth - 22,
-        total: margin + contentWidth,
+        total: margin + contentWidth - pad,
     };
 
     // Table header
