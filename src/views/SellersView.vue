@@ -69,20 +69,28 @@
           <button class="btn btn-ghost btn-icon" @click="showModal = false">✕</button>
         </div>
         <div class="modal-body">
+          <div class="form-group">
+            <label class="form-label">{{ $t('common.name') }} (Firma) *</label>
+            <input class="form-input" v-model="form.name" :placeholder="$t('sellers.namePlaceholder')" />
+          </div>
           <div class="form-row">
             <div class="form-group">
-              <label class="form-label">{{ $t('common.name') }} *</label>
-              <input class="form-input" v-model="form.name" :placeholder="$t('sellers.namePlaceholder')" />
+              <label class="form-label">{{ $t('common.firstName') }}</label>
+              <input class="form-input" v-model="form.first_name" />
             </div>
             <div class="form-group">
-              <label class="form-label">{{ $t('sellers.logo') }}</label>
-              <div class="flex items-center gap-2">
-                <div class="logo-preview" @click="selectLogo">
-                  <img v-if="form.logo_data" :src="form.logo_data" alt="Logo" />
-                  <div v-else class="logo-placeholder">{{ $t('sellers.chooseLogo') }}</div>
-                </div>
-                <button v-if="form.logo_data" class="btn btn-ghost btn-sm" @click="form.logo_data = ''">{{ $t('sellers.removeLogo') }}</button>
+              <label class="form-label">{{ $t('common.lastName') }}</label>
+              <input class="form-input" v-model="form.last_name" />
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">{{ $t('sellers.logo') }}</label>
+            <div class="flex items-center gap-2">
+              <div class="logo-preview" @click="selectLogo">
+                <img v-if="form.logo_data" :src="form.logo_data" alt="Logo" />
+                <div v-else class="logo-placeholder">{{ $t('sellers.chooseLogo') }}</div>
               </div>
+              <button v-if="form.logo_data" class="btn btn-ghost btn-sm" @click="form.logo_data = ''">{{ $t('sellers.removeLogo') }}</button>
             </div>
           </div>
           <hr style="border-color: var(--border-color); margin: 8px 0 16px" />
@@ -230,7 +238,7 @@ const editing = ref(false);
 const deleteTarget = ref<Seller | null>(null);
 
 const emptyForm = (): Seller => ({
-  name: '', street: '', city: '', zip: '', country: 'Deutschland',
+  name: '', first_name: '', last_name: '', street: '', city: '', zip: '', country: 'Deutschland',
   phone: '', email: '', website: '', tax_id: '', vat_id: '',
   bank_name: '', bank_iban: '', bank_bic: '', logo_data: '',
   invoice_prefix: 'RE', next_invoice_number: 1, pdf_template: 'classic'

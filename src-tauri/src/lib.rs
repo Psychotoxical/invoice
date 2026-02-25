@@ -25,6 +25,8 @@ pub fn run() {
                     logo_data TEXT DEFAULT '',
                     invoice_prefix TEXT DEFAULT 'RE',
                     next_invoice_number INTEGER DEFAULT 1,
+                    first_name TEXT DEFAULT '',
+                    last_name TEXT DEFAULT '',
                     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
                 );
 
@@ -124,6 +126,15 @@ pub fn run() {
             description: "add brand color to sellers",
             sql: "
                 ALTER TABLE sellers ADD COLUMN color TEXT DEFAULT '#3b82f6';
+            ",
+            kind: MigrationKind::Up,
+        },
+        Migration {
+            version: 4,
+            description: "add first_name and last_name to sellers",
+            sql: "
+                ALTER TABLE sellers ADD COLUMN first_name TEXT DEFAULT '';
+                ALTER TABLE sellers ADD COLUMN last_name TEXT DEFAULT '';
             ",
             kind: MigrationKind::Up,
         },

@@ -26,6 +26,8 @@ export default {
         noResults: 'Keine Ergebnisse',
         actions: 'Aktionen',
         name: 'Name',
+        firstName: 'Vorname',
+        lastName: 'Nachname',
         email: 'E-Mail',
         phone: 'Telefon',
         street: 'Straße',

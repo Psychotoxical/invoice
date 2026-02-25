@@ -47,8 +47,10 @@ export function buildInvoicePdfDoc(invoice: Invoice, seller: Seller, customer: C
     // Seller info (right)
     doc.setFontSize(10);
     doc.setTextColor(100, 100, 100);
+    const sellerPerson = [seller.first_name, seller.last_name].filter(Boolean).join(' ');
     const sellerLines = [
         seller.name,
+        sellerPerson || '',
         seller.street,
         `${seller.zip} ${seller.city}`,
         seller.phone ? `${t('pdf.tel')} ${seller.phone}` : '',
@@ -67,7 +69,8 @@ export function buildInvoicePdfDoc(invoice: Invoice, seller: Seller, customer: C
     // ==================== SENDER LINE (small above address) ====================
     doc.setFontSize(6);
     doc.setTextColor(150, 150, 150);
-    doc.text(`${seller.name} · ${seller.street} · ${seller.zip} ${seller.city}`, margin, y);
+    const senderName = sellerPerson ? `${seller.name}, ${sellerPerson}` : seller.name;
+    doc.text(`${senderName} · ${seller.street} · ${seller.zip} ${seller.city}`, margin, y);
     y += 8;
 
     // ==================== RECIPIENT ====================
@@ -286,6 +289,7 @@ export function buildInvoicePdfDoc(invoice: Invoice, seller: Seller, customer: C
     // Col 1 - Contact
     doc.text(seller.name, col1, fy);
     fy += 3;
+    if (sellerPerson) { doc.text(sellerPerson, col1, fy); fy += 3; }
     if (seller.street) { doc.text(seller.street, col1, fy); fy += 3; }
     doc.text(`${seller.zip} ${seller.city}`, col1, fy);
 
