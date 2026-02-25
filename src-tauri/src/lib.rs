@@ -31,8 +31,6 @@ pub fn run() {
                     logo_data TEXT DEFAULT '',
                     invoice_prefix TEXT DEFAULT 'RE',
                     next_invoice_number INTEGER DEFAULT 1,
-                    first_name TEXT DEFAULT '',
-                    last_name TEXT DEFAULT '',
                     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
                 );
 
@@ -42,12 +40,6 @@ pub fn run() {
                     street TEXT DEFAULT '',
                     city TEXT DEFAULT '',
                     zip TEXT DEFAULT '',
-                    first_name TEXT DEFAULT '',
-                    last_name TEXT DEFAULT '',
-                    default_payment_terms TEXT DEFAULT '',
-                    default_tax_rate REAL DEFAULT NULL,
-                    currency TEXT DEFAULT '',
-                    default_note TEXT DEFAULT '',
                     country TEXT DEFAULT 'Deutschland',
                     phone TEXT DEFAULT '',
                     email TEXT DEFAULT '',

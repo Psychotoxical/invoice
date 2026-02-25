@@ -5,6 +5,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.23] - 2026-02-25
+
+### Fixed
+- **Fresh Install Crash**: Resolved a syntax error in the initial database creation script that caused fresh installations of version 1.0.22 to hang and fail to initialize the database completely.
+
 ## [1.0.22] - 2026-02-25
 
 ### Fixed
