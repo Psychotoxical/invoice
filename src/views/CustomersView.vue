@@ -54,11 +54,11 @@
     </div>
 
     <!-- Modal -->
-    <div class="modal-overlay" v-if="showModal" @click.self="showModal = false">
+    <div class="modal-overlay" v-if="showModal" @click.self="confirmClose">
       <div class="modal">
         <div class="modal-header">
           <h2>{{ editing ? $t('customers.editCustomer') : $t('customers.newCustomerTitle') }}</h2>
-          <button class="btn btn-ghost btn-icon" @click="showModal = false">✕</button>
+          <button class="btn btn-ghost btn-icon" @click="confirmClose">✕</button>
         </div>
         <div class="modal-body">
           <div class="form-group">
@@ -95,11 +95,12 @@
           </div>
           <div class="form-group">
             <label class="form-label">{{ $t('common.notes') }}</label>
-            <textarea class="form-textarea" v-model="form.notes" :placeholder="$t('customers.notesPlaceholder')"></textarea>
+            <textarea class="form-textarea" v-model="form.notes"
+              :placeholder="$t('customers.notesPlaceholder')"></textarea>
           </div>
         </div>
         <div class="modal-footer">
-          <button class="btn btn-secondary" @click="showModal = false">{{ $t('common.cancel') }}</button>
+          <button class="btn btn-secondary" @click="confirmClose">{{ $t('common.cancel') }}</button>
           <button class="btn btn-primary" @click="save" :disabled="!form.name">{{ $t('common.save') }}</button>
         </div>
       </div>
@@ -108,7 +109,9 @@
     <!-- Delete confirm -->
     <div class="modal-overlay" v-if="deleteTarget" @click.self="deleteTarget = null">
       <div class="modal" style="max-width: 400px">
-        <div class="modal-header"><h2>{{ $t('customers.deleteConfirm') }}</h2></div>
+        <div class="modal-header">
+          <h2>{{ $t('customers.deleteConfirm') }}</h2>
+        </div>
         <div class="modal-body">
           <p>{{ $t('customers.deleteMessage', { name: deleteTarget.name }) }}</p>
           <div class="confirm-actions">
@@ -126,6 +129,7 @@ import { ref, computed, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { getCustomers, createCustomer, updateCustomer, deleteCustomer, type Customer } from '../services/database';
 import { useToast } from '../composables/useToast';
+import { confirm } from '@tauri-apps/plugin-dialog';
 
 const { t } = useI18n({ useScope: 'global' });
 const toast = useToast();
@@ -142,6 +146,7 @@ const emptyForm = (): Customer => ({
 });
 
 const form = ref<Customer>(emptyForm());
+const originalForm = ref<Customer>(emptyForm());
 
 const filtered = computed(() => {
   if (!search.value) return customers.value;
@@ -158,9 +163,25 @@ async function load() {
 }
 
 function openForm(c?: Customer) {
-  if (c) { editing.value = true; form.value = { ...c }; }
-  else { editing.value = false; form.value = emptyForm(); }
+  if (c) {
+    editing.value = true;
+    form.value = { ...c };
+    originalForm.value = { ...c };
+  } else {
+    editing.value = false;
+    form.value = emptyForm();
+    originalForm.value = emptyForm();
+  }
   showModal.value = true;
+}
+
+async function confirmClose() {
+  const hasChanges = JSON.stringify(form.value) !== JSON.stringify(originalForm.value);
+  if (hasChanges) {
+    const agreed = await confirm(t('common.unsavedChanges'), { title: 'VibeBill', kind: 'warning' });
+    if (!agreed) return;
+  }
+  showModal.value = false;
 }
 
 async function save() {

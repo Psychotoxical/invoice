@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.24] - 2026-02-26
+
+### Added
+- **Unsaved Changes Confirmation**: Added a native dialog prompt to prevent accidental data loss when closing the Add/Edit modals for Customers, Sellers, and Products by clicking outside or pressing cancel.
+- **Quick Seller Invoice Defaults**: Added the ability to specify invoice defaults (payment terms, tax rate, currency, standard note) directly when creating a new Seller from within the Invoice form.
+
 ## [1.0.23] - 2026-02-25
 
 ### Fixed

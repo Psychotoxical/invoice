@@ -24,6 +24,7 @@ export default {
         back: '← Back',
         search: 'Search...',
         noResults: 'No results',
+        unsavedChanges: 'Unsaved changes will be lost. Really close?',
         actions: 'Actions',
         name: 'Name',
         firstName: 'First Name',

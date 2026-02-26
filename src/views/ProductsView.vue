@@ -20,9 +20,12 @@
         </div>
       </div>
       <div class="tabs">
-        <button class="tab" :class="{ active: activeTab === 'all' }" @click="activeTab = 'all'">{{ $t('products.tabAll') }}</button>
-        <button class="tab" :class="{ active: activeTab === 'product' }" @click="activeTab = 'product'">{{ $t('products.tabProducts') }}</button>
-        <button class="tab" :class="{ active: activeTab === 'service' }" @click="activeTab = 'service'">{{ $t('products.tabServices') }}</button>
+        <button class="tab" :class="{ active: activeTab === 'all' }" @click="activeTab = 'all'">{{ $t('products.tabAll')
+        }}</button>
+        <button class="tab" :class="{ active: activeTab === 'product' }" @click="activeTab = 'product'">{{
+          $t('products.tabProducts') }}</button>
+        <button class="tab" :class="{ active: activeTab === 'service' }" @click="activeTab = 'service'">{{
+          $t('products.tabServices') }}</button>
       </div>
       <div class="card">
         <div class="card-body" style="padding: 0">
@@ -45,7 +48,8 @@
                   <strong>{{ p.name }}</strong>
                   <div class="text-xs text-secondary" v-if="p.description">{{ p.description }}</div>
                 </td>
-                <td><span class="badge" :class="p.type === 'product' ? 'badge-sent' : 'badge-paid'">{{ p.type === 'product' ? $t('products.typeProduct') : $t('products.typeService') }}</span></td>
+                <td><span class="badge" :class="p.type === 'product' ? 'badge-sent' : 'badge-paid'">{{ p.type ===
+                  'product' ? $t('products.typeProduct') : $t('products.typeService') }}</span></td>
                 <td>{{ sellerName(p.seller_id) }}</td>
                 <td>{{ p.unit }}</td>
                 <td class="text-right">{{ formatCurrency(p.price_net) }}</td>
@@ -72,11 +76,11 @@
     </div>
 
     <!-- Modal -->
-    <div class="modal-overlay" v-if="showModal" @click.self="showModal = false">
+    <div class="modal-overlay" v-if="showModal" @click.self="confirmClose">
       <div class="modal">
         <div class="modal-header">
           <h2>{{ editing ? $t('products.editProduct') : $t('products.newProductTitle') }}</h2>
-          <button class="btn btn-ghost btn-icon" @click="showModal = false">✕</button>
+          <button class="btn btn-ghost btn-icon" @click="confirmClose">✕</button>
         </div>
         <div class="modal-body">
           <div class="form-row">
@@ -101,7 +105,8 @@
           </div>
           <div class="form-group">
             <label class="form-label">{{ $t('common.description') }}</label>
-            <textarea class="form-textarea" v-model="form.description" rows="2" :placeholder="$t('products.descriptionPlaceholder')"></textarea>
+            <textarea class="form-textarea" v-model="form.description" rows="2"
+              :placeholder="$t('products.descriptionPlaceholder')"></textarea>
           </div>
           <div class="form-row-3">
             <div class="form-group">
@@ -130,8 +135,9 @@
           </div>
         </div>
         <div class="modal-footer">
-          <button class="btn btn-secondary" @click="showModal = false">{{ $t('common.cancel') }}</button>
-          <button class="btn btn-primary" @click="save" :disabled="!form.name || !form.seller_id">{{ $t('common.save') }}</button>
+          <button class="btn btn-secondary" @click="confirmClose">{{ $t('common.cancel') }}</button>
+          <button class="btn btn-primary" @click="save" :disabled="!form.name || !form.seller_id">{{ $t('common.save')
+          }}</button>
         </div>
       </div>
     </div>
@@ -139,7 +145,9 @@
     <!-- Delete confirm -->
     <div class="modal-overlay" v-if="deleteTarget" @click.self="deleteTarget = null">
       <div class="modal" style="max-width: 400px">
-        <div class="modal-header"><h2>{{ $t('products.deleteConfirm') }}</h2></div>
+        <div class="modal-header">
+          <h2>{{ $t('products.deleteConfirm') }}</h2>
+        </div>
         <div class="modal-body">
           <p>{{ $t('products.deleteMessage', { name: deleteTarget.name }) }}</p>
           <div class="confirm-actions">
@@ -157,6 +165,7 @@ import { ref, computed, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { getProducts, createProduct, updateProduct, deleteProduct, getSellers, type Product, type Seller } from '../services/database';
 import { useToast } from '../composables/useToast';
+import { confirm } from '@tauri-apps/plugin-dialog';
 
 const { locale, t } = useI18n({ useScope: 'global' });
 const toast = useToast();
@@ -175,6 +184,7 @@ const emptyForm = (): Product => ({
 });
 
 const form = ref<Product>(emptyForm());
+const originalForm = ref<Product>(emptyForm());
 
 const filtered = computed(() => {
   let items = products.value;
@@ -205,15 +215,28 @@ function formatCurrency(val: number): string {
 }
 
 function openForm(p?: Product) {
-  if (p) { editing.value = true; form.value = { ...p }; }
-  else {
+  if (p) {
+    editing.value = true;
+    form.value = { ...p };
+    originalForm.value = { ...p };
+  } else {
     editing.value = false;
     const f = emptyForm();
     if (filterSeller.value) f.seller_id = filterSeller.value;
     if (sellers.value.length === 1 && sellers.value[0].id) f.seller_id = sellers.value[0].id;
-    form.value = f;
+    form.value = { ...f };
+    originalForm.value = { ...f };
   }
   showModal.value = true;
+}
+
+async function confirmClose() {
+  const hasChanges = JSON.stringify(form.value) !== JSON.stringify(originalForm.value);
+  if (hasChanges) {
+    const agreed = await confirm(t('common.unsavedChanges'), { title: 'VibeBill', kind: 'warning' });
+    if (!agreed) return;
+  }
+  showModal.value = false;
 }
 
 async function save() {

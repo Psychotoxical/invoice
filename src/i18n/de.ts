@@ -24,6 +24,7 @@ export default {
         back: '← Zurück',
         search: 'Suchen...',
         noResults: 'Keine Ergebnisse',
+        unsavedChanges: 'Ungespeicherte Änderungen werden verworfen. Wirklich schließen?',
         actions: 'Aktionen',
         name: 'Name',
         firstName: 'Vorname',

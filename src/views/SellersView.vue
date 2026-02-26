@@ -62,11 +62,11 @@
     </div>
 
     <!-- Modal -->
-    <div class="modal-overlay" v-if="showModal" @click.self="showModal = false">
+    <div class="modal-overlay" v-if="showModal" @click.self="confirmClose">
       <div class="modal modal-wide">
         <div class="modal-header">
           <h2>{{ editing ? $t('sellers.editSeller') : $t('sellers.newSellerTitle') }}</h2>
-          <button class="btn btn-ghost btn-icon" @click="showModal = false">✕</button>
+          <button class="btn btn-ghost btn-icon" @click="confirmClose">✕</button>
         </div>
         <div class="modal-body">
           <div class="form-group">
@@ -90,7 +90,8 @@
                 <img v-if="form.logo_data" :src="form.logo_data" alt="Logo" />
                 <div v-else class="logo-placeholder">{{ $t('sellers.chooseLogo') }}</div>
               </div>
-              <button v-if="form.logo_data" class="btn btn-ghost btn-sm" @click="form.logo_data = ''">{{ $t('sellers.removeLogo') }}</button>
+              <button v-if="form.logo_data" class="btn btn-ghost btn-sm" @click="form.logo_data = ''">{{
+                $t('sellers.removeLogo') }}</button>
             </div>
           </div>
           <hr style="border-color: var(--border-color); margin: 8px 0 16px" />
@@ -161,7 +162,8 @@
             </div>
             <div class="form-group" style="width: 140px;">
               <label class="form-label">{{ $t('sellers.color') }}</label>
-              <input class="form-input" type="color" v-model="form.color" style="height: 38px; padding: 2px 4px; cursor: pointer;" />
+              <input class="form-input" type="color" v-model="form.color"
+                style="height: 38px; padding: 2px 4px; cursor: pointer;" />
               <div class="form-hint" style="line-height: 1.2">{{ $t('sellers.colorHint') }}</div>
             </div>
             <div class="form-group">
@@ -181,7 +183,8 @@
             </div>
           </div>
           <hr style="border-color: var(--border-color); margin: 8px 0 16px" />
-          <h3 style="margin-top: 0; margin-bottom: 12px; font-size: 14px; color: var(--text-primary)">{{ $t('settings.invoiceDefaults') }}</h3>
+          <h3 style="margin-top: 0; margin-bottom: 12px; font-size: 14px; color: var(--text-primary)">{{
+            $t('settings.invoiceDefaults') }}</h3>
           <div class="form-row-3">
             <div class="form-group">
               <label class="form-label">{{ $t('settings.defaultPaymentTerms') }}</label>
@@ -195,7 +198,8 @@
             </div>
             <div class="form-group">
               <label class="form-label">{{ $t('settings.defaultVat') }} (%)</label>
-              <input class="form-input" v-model.number="form.default_tax_rate" type="number" step="0.5" min="0" max="100" />
+              <input class="form-input" v-model.number="form.default_tax_rate" type="number" step="0.5" min="0"
+                max="100" />
             </div>
             <div class="form-group">
               <label class="form-label">{{ $t('settings.currency') }}</label>
@@ -215,7 +219,7 @@
           </div>
         </div>
         <div class="modal-footer">
-          <button class="btn btn-secondary" @click="showModal = false">{{ $t('common.cancel') }}</button>
+          <button class="btn btn-secondary" @click="confirmClose">{{ $t('common.cancel') }}</button>
           <button class="btn btn-primary" @click="save" :disabled="!form.name">{{ $t('common.save') }}</button>
         </div>
       </div>
@@ -260,6 +264,7 @@ import { getSellers, createSeller, updateSeller, deleteSeller, getInvoices, type
 import { useToast } from '../composables/useToast';
 import { generateYearlyOverviewPdf } from '../utils/yearlyOverview';
 import { previewPdfTemplate } from '../utils/pdfGenerator';
+import { confirm } from '@tauri-apps/plugin-dialog';
 
 const { t } = useI18n({ useScope: 'global' });
 const toast = useToast();
@@ -279,6 +284,7 @@ const emptyForm = (): Seller => ({
 });
 
 const form = ref<Seller>(emptyForm());
+const originalForm = ref<Seller>(emptyForm());
 const previewPdfUrl = ref<string | null>(null);
 
 const filtered = computed(() => {
@@ -303,11 +309,22 @@ function openForm(s?: Seller) {
   if (s) {
     editing.value = true;
     form.value = { ...s };
+    originalForm.value = { ...s };
   } else {
     editing.value = false;
     form.value = emptyForm();
+    originalForm.value = emptyForm();
   }
   showModal.value = true;
+}
+
+async function confirmClose() {
+  const hasChanges = JSON.stringify(form.value) !== JSON.stringify(originalForm.value);
+  if (hasChanges) {
+    const agreed = await confirm(t('common.unsavedChanges'), { title: 'VibeBill', kind: 'warning' });
+    if (!agreed) return;
+  }
+  showModal.value = false;
 }
 
 async function save() {
@@ -358,7 +375,7 @@ async function exportYearly(s: Seller) {
   if (!yearStr) return;
   const year = parseInt(yearStr, 10);
   if (isNaN(year)) return;
-  
+
   try {
     const invoices = await getInvoices();
     await generateYearlyOverviewPdf(s.id, year, invoices);
