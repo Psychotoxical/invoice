@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.25] - 2026-02-26
+
+### Added
+- **Help Center**: Added a comprehensive internal help guide (accessible via the `❓` icon) with detailed explanations for all core app functions.
+
+### Changed
+- **Navigation Flow**: Reordered the main sidebar navigation to improve workflow logic (Dashboard > Sellers > Products > Customers > Invoices > Settings).
+- **Settings Location**: Moved the Settings menu from the top header into the main sidebar navigation.
+
 ## [1.0.24] - 2026-02-26
 
 ### Added

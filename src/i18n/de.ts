@@ -6,6 +6,7 @@ export default {
         lightTheme: 'Helles Theme',
         darkTheme: 'Dunkles Theme',
         settings: 'Einstellungen',
+        help: 'Hilfe',
     },
     nav: {
         dashboard: 'Dashboard',
@@ -13,6 +14,7 @@ export default {
         customers: 'Kunden',
         sellers: 'Verkäufer',
         products: 'Waren & Dienste',
+        settings: 'Einstellungen',
     },
 
     // Common
@@ -295,6 +297,17 @@ export default {
         notes: 'Hinweise:',
         tel: 'Tel:',
         email: 'E-Mail:',
+    },
+
+    // Help
+    help: {
+        title: 'Hilfe',
+        dashboard: 'Das Dashboard gibt dir einen Überblick über alle offenen Rechnungen, die aktuellen Monatsumsätze und zeigt auf einen Blick, wo deine Aufmerksamkeit gefordert ist.',
+        sellers: 'Unter "Verkäufer" kannst du verschiedene Absender-Profile (z.B. deine eigenen Firmen oder Marken) anlegen. Jeder Verkäufer kann eine eigene Rechnungsnummerierung, ein eigenes Logo und individuelle PDF-Templates haben.',
+        products: 'In "Waren & Dienste" verwaltest du deinen Katalog. Lege hier Dinge an, die du häufig in Rechnung stellst. Hinterlege Standardpreise, Einheiten und Steuersätze, um dir später beim Ausfüllen von Rechnungen Zeit zu sparen.',
+        customers: 'Die Kundenverwaltung speichert alle Adressen und Kontaktdaten deiner Rechnungsempfänger. Du kannst Kunden auch während der Rechnungserstellung schnell hinzufügen.',
+        invoices: 'Hier findest du eine Liste all deiner Rechnungen. Du kannst neue Entwürfe anlegen, Rechnungen als PDF exportieren, den Status ("bezahlt", "überfällig") verfolgen und Zahlungseingänge vermerken.',
+        settings: 'In den Einstellungen konfigurierst du das generelle Verhalten der App, wie Standard-Zahlungsziele oder Währungen. Hier kannst du auch Backups deiner lokalen Datenbank erstellen und wieder einspielen.',
     },
 
     // Toasts

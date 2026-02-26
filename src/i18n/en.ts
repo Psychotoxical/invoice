@@ -6,6 +6,7 @@ export default {
         lightTheme: 'Light Theme',
         darkTheme: 'Dark Theme',
         settings: 'Settings',
+        help: 'Help',
     },
     nav: {
         dashboard: 'Dashboard',
@@ -13,6 +14,7 @@ export default {
         customers: 'Customers',
         sellers: 'Sellers',
         products: 'Products & Services',
+        settings: 'Settings',
     },
 
     // Common
@@ -295,6 +297,17 @@ export default {
         notes: 'Notes:',
         tel: 'Tel:',
         email: 'Email:',
+    },
+
+    // Help
+    help: {
+        title: 'Help',
+        dashboard: 'The Dashboard gives you an overview of all open invoices, your current monthly revenue, and highlights where your attention is needed at a glance.',
+        sellers: 'Under "Sellers" you can manage multiple sender profiles (e.g., your different companies or brands). Each seller can have their own invoice numbering, logo, and custom PDF templates.',
+        products: 'In "Products & Services" you maintain your catalog. Add items you frequently invoice here. Set default prices, units, and tax rates to save time when filling out invoices later.',
+        customers: 'The customer management stores all addresses and contact details of your invoice recipients. You can also quickly add customers directly while creating an invoice.',
+        invoices: 'Here you will find a list of all your invoices. You can create new drafts, export invoices as PDFs, track their status ("paid", "overdue"), and record incoming payments.',
+        settings: 'In the Settings, you configure the general behavior of the app, such as default payment terms or currencies. You can also create and import backups of your local database here.',
     },
 
     // Toasts

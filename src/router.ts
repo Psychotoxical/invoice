@@ -6,6 +6,7 @@ import ProductsView from './views/ProductsView.vue';
 import InvoicesView from './views/InvoicesView.vue';
 import InvoiceFormView from './views/InvoiceFormView.vue';
 import SettingsView from './views/SettingsView.vue';
+import HelpView from './views/HelpView.vue';
 
 const router = createRouter({
     history: createWebHashHistory(),
@@ -18,6 +19,7 @@ const router = createRouter({
         { path: '/invoices/new', name: 'invoice-new', component: InvoiceFormView },
         { path: '/invoices/:id/edit', name: 'invoice-edit', component: InvoiceFormView, props: true },
         { path: '/settings', name: 'settings', component: SettingsView },
+        { path: '/help', name: 'help', component: HelpView },
     ],
 });
 

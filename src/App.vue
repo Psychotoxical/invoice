@@ -10,8 +10,8 @@
           <button class="sidebar-icon-btn" @click="toggleTheme" :title="theme === 'dark' ? $t('app.lightTheme') : $t('app.darkTheme')">
             {{ theme === 'dark' ? '☀️' : '🌙' }}
           </button>
-          <router-link to="/settings" class="sidebar-icon-btn" :title="$t('app.settings')">
-            ⚙️
+          <router-link to="/help" class="sidebar-icon-btn" :title="$t('app.help')">
+            ❓
           </router-link>
         </div>
       </div>
@@ -19,17 +19,20 @@
         <router-link to="/" class="nav-item" :class="{ active: $route.path === '/' }">
           <span class="nav-icon">📊</span> {{ $t('nav.dashboard') }}
         </router-link>
-        <router-link to="/invoices" class="nav-item" :class="{ active: $route.path.startsWith('/invoices') }">
-          <span class="nav-icon">📋</span> {{ $t('nav.invoices') }}
-        </router-link>
-        <router-link to="/customers" class="nav-item" :class="{ active: $route.path === '/customers' }">
-          <span class="nav-icon">👥</span> {{ $t('nav.customers') }}
-        </router-link>
         <router-link to="/sellers" class="nav-item" :class="{ active: $route.path === '/sellers' }">
           <span class="nav-icon">🏢</span> {{ $t('nav.sellers') }}
         </router-link>
         <router-link to="/products" class="nav-item" :class="{ active: $route.path === '/products' }">
           <span class="nav-icon">📦</span> {{ $t('nav.products') }}
+        </router-link>
+        <router-link to="/customers" class="nav-item" :class="{ active: $route.path === '/customers' }">
+          <span class="nav-icon">👥</span> {{ $t('nav.customers') }}
+        </router-link>
+        <router-link to="/invoices" class="nav-item" :class="{ active: $route.path.startsWith('/invoices') }">
+          <span class="nav-icon">📋</span> {{ $t('nav.invoices') }}
+        </router-link>
+        <router-link to="/settings" class="nav-item" :class="{ active: $route.path === '/settings' }">
+          <span class="nav-icon">⚙️</span> {{ $t('nav.settings') }}
         </router-link>
       </nav>
     </aside>
