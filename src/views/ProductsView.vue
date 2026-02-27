@@ -21,7 +21,7 @@
       </div>
       <div class="tabs">
         <button class="tab" :class="{ active: activeTab === 'all' }" @click="activeTab = 'all'">{{ $t('products.tabAll')
-        }}</button>
+          }}</button>
         <button class="tab" :class="{ active: activeTab === 'product' }" @click="activeTab = 'product'">{{
           $t('products.tabProducts') }}</button>
         <button class="tab" :class="{ active: activeTab === 'service' }" @click="activeTab = 'service'">{{
@@ -51,7 +51,7 @@
                 <td><span class="badge" :class="p.type === 'product' ? 'badge-sent' : 'badge-paid'">{{ p.type ===
                   'product' ? $t('products.typeProduct') : $t('products.typeService') }}</span></td>
                 <td>{{ sellerName(p.seller_id) }}</td>
-                <td>{{ p.unit }}</td>
+                <td>{{ displayUnit(p.unit) }}</td>
                 <td class="text-right">{{ formatCurrency(p.price_net) }}</td>
                 <td class="text-right">{{ p.tax_rate }}%</td>
                 <td class="text-right" v-if="activeTab !== 'service'">{{ p.type === 'product' ? p.stock : '—' }}</td>
@@ -237,6 +237,18 @@ function sellerName(id: number): string {
 
 function formatCurrency(val: number): string {
   return new Intl.NumberFormat(locale.value === 'de' ? 'de-DE' : 'en-US', { style: 'currency', currency: 'EUR' }).format(val);
+}
+
+function displayUnit(unit: string): string {
+  switch (unit) {
+    case 'Stk': return t('invoiceForm.unitPc');
+    case 'Std': return t('invoiceForm.unitHour');
+    case 'Pausch.': return t('invoiceForm.unitFlat');
+    case 'kg': return t('invoiceForm.unitKg');
+    case 'm': return t('invoiceForm.unitM');
+    case 'Lizenz': return t('invoiceForm.unitLicense');
+    default: return unit;
+  }
 }
 
 function openForm(p?: Product) {

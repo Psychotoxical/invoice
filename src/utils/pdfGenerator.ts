@@ -207,7 +207,18 @@ export function buildInvoicePdfDoc(invoice: Invoice, seller: Seller, customer: C
         doc.text(descLines[0] || '', colX.desc, y);
 
         doc.text(formatNumber(item.quantity), colX.qty, y, { align: 'right' });
-        doc.text(item.unit, colX.unit, y);
+        const displayUnit = (unit: string): string => {
+            switch (unit) {
+                case 'Stk': return t('invoiceForm.unitPc');
+                case 'Std': return t('invoiceForm.unitHour');
+                case 'Pausch.': return t('invoiceForm.unitFlat');
+                case 'kg': return t('invoiceForm.unitKg');
+                case 'm': return t('invoiceForm.unitM');
+                case 'Lizenz': return t('invoiceForm.unitLicense');
+                default: return unit;
+            }
+        };
+        doc.text(displayUnit(item.unit), colX.unit, y);
         doc.text(formatCurrency(item.price_net), colX.price, y, { align: 'right' });
         doc.text(`${item.tax_rate}%`, colX.tax, y, { align: 'right' });
         doc.text(formatCurrency(item.total_gross), colX.total, y, { align: 'right' });
