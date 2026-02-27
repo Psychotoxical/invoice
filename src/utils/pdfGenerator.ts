@@ -1,6 +1,6 @@
 import jsPDF from 'jspdf';
-import { save } from '@tauri-apps/plugin-dialog';
-import { create } from '@tauri-apps/plugin-fs';
+import { save, confirm } from '@tauri-apps/plugin-dialog';
+import { create, exists } from '@tauri-apps/plugin-fs';
 import { getSeller, getCustomer, getSetting, type Invoice, type Seller, type Customer } from '../services/database';
 import i18n from '../i18n';
 
@@ -241,6 +241,20 @@ export function buildInvoicePdfDoc(invoice: Invoice, seller: Seller, customer: C
         taxMap[item.tax_rate] += item.total_tax;
     }
 
+    // Add shipping tax to taxMap
+    const sNet = typeof invoice.shipping_net === 'number' ? invoice.shipping_net : 0;
+    if (sNet > 0) {
+        const sRate = typeof invoice.shipping_tax_rate === 'number' ? invoice.shipping_tax_rate : 19;
+        const sTax = Math.round(sNet * sRate) / 100;
+        if (!taxMap[sRate]) taxMap[sRate] = 0;
+        taxMap[sRate] += sTax;
+
+        doc.setFontSize(9);
+        doc.text(t('pdf.shippingNet'), labelX, y, { align: 'right' });
+        doc.text(formatCurrency(sNet), totalsX, y, { align: 'right' });
+        y += 5;
+    }
+
     doc.setFontSize(9);
     doc.text(t('pdf.netTotal'), labelX, y, { align: 'right' });
     doc.text(formatCurrency(invoice.total_net), totalsX, y, { align: 'right' });
@@ -268,7 +282,10 @@ export function buildInvoicePdfDoc(invoice: Invoice, seller: Seller, customer: C
     doc.setFontSize(9);
     doc.setTextColor(80, 80, 80);
 
-    if (invoice.payment_terms) {
+    if (invoice.already_paid || invoice.status === 'paid') {
+        doc.text(t('pdf.paymentReceived'), margin, y);
+        y += 5;
+    } else if (invoice.payment_terms) {
         doc.text(t('pdf.paymentTerms', { terms: invoice.payment_terms }), margin, y);
         y += 5;
     }
@@ -355,6 +372,24 @@ export async function generateInvoicePdf(invoice: Invoice): Promise<void> {
 
     if (filePath) {
         try {
+            if (await exists(filePath)) {
+                const locale = i18n.global.locale.value || 'de';
+                const msg = locale === 'de'
+                    ? `Die Datei "${defaultName}" existiert bereits. Möchtest du sie überschreiben?`
+                    : `The file "${defaultName}" already exists. Do you want to overwrite it?`;
+                const title = locale === 'de' ? 'Datei überschreiben?' : 'Overwrite file?';
+
+                const agreed = await confirm(msg, { title, kind: 'warning' });
+                if (!agreed) {
+                    // Ask for new path
+                    filePath = await save({
+                        defaultPath: defaultName,
+                        filters: [{ name: 'PDF', extensions: ['pdf'] }],
+                    });
+                    if (!filePath) return; // User cancelled second prompt
+                }
+            }
+
             const pdfBytes = doc.output('arraybuffer');
             const file = await create(filePath);
             await file.write(new Uint8Array(pdfBytes));

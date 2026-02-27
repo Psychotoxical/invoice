@@ -87,7 +87,13 @@
                 <td>{{ inv.seller_name }}</td>
                 <td>{{ formatDate(inv.date) }}</td>
                 <td><span :class="'badge badge-' + inv.status">{{ $t('status.' + inv.status) }}</span></td>
-                <td class="text-right">{{ formatCurrency(inv.total_gross) }}</td>
+                <td class="text-right">
+                  <div>{{ formatCurrency(inv.total_gross) }}</div>
+                  <div v-if="Number(inv.paid_amount) > 0 && inv.status !== 'paid' && inv.status !== 'sent'" 
+                       style="font-size: 0.8em; color: var(--success); margin-top: 2px;">
+                    {{ formatCurrency(Number(inv.paid_amount)) }} {{ $t('status.paid') }}
+                  </div>
+                </td>
               </tr>
             </tbody>
           </table>

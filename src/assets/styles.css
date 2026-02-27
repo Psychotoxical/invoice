@@ -39,6 +39,7 @@
 
     /* Spacing */
     --sidebar-width: 240px;
+    --sidebar-collapsed-width: 64px;
     --topbar-height: 56px;
     --radius: 8px;
     --radius-sm: 4px;
@@ -101,8 +102,8 @@
 
 /* Dark mode specific overrides for better contrast */
 [data-theme="dark"] .topbar {
-    background: #1f2937;
-    border-color: #374151;
+    background: transparent;
+    border-color: transparent;
 }
 
 [data-theme="dark"] .topbar-title {
@@ -347,6 +348,11 @@ body {
     flex-direction: column;
     flex-shrink: 0;
     overflow-y: auto;
+    transition: width var(--transition);
+}
+
+.sidebar.collapsed {
+    width: var(--sidebar-collapsed-width);
 }
 
 .sidebar-header {
@@ -357,23 +363,54 @@ body {
     justify-content: space-between;
 }
 
+.sidebar.collapsed .sidebar-header {
+    padding: 16px 8px;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+}
+
+.sidebar-header .sidebar-brand {
+    display: flex;
+    flex-direction: column;
+}
+
 .sidebar-header h1 {
     color: var(--text-inverse);
     font-size: var(--font-size-xl);
     font-weight: 700;
     letter-spacing: -0.025em;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    white-space: nowrap;
+}
+
+.sidebar.collapsed .sidebar-header h1 {
+    font-size: var(--font-size-2xl);
+    justify-content: center;
 }
 
 .sidebar-header .subtitle {
     color: var(--text-sidebar);
     font-size: var(--font-size-xs);
     margin-top: 2px;
+    white-space: nowrap;
+}
+
+.sidebar.collapsed .nav-text {
+    display: none;
 }
 
 .sidebar-header-actions {
     display: flex;
     gap: 4px;
     margin-top: 2px;
+}
+
+.sidebar.collapsed .sidebar-header-actions {
+    flex-direction: column;
+    margin-top: 0;
 }
 
 .sidebar-icon-btn {
@@ -400,6 +437,14 @@ body {
 .sidebar-nav {
     flex: 1;
     padding: 12px 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.sidebar-footer {
+    padding: 12px 8px;
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 .nav-item {
@@ -414,11 +459,17 @@ body {
     font-weight: 500;
     cursor: pointer;
     transition: all var(--transition);
-    margin-bottom: 2px;
     border: none;
     background: none;
     width: 100%;
     text-align: left;
+    white-space: nowrap;
+    overflow: hidden;
+}
+
+.sidebar.collapsed .nav-item {
+    padding: 10px 0;
+    justify-content: center;
 }
 
 .nav-item:hover {
@@ -454,8 +505,8 @@ body {
 
 .topbar {
     height: var(--topbar-height);
-    background: var(--bg-secondary);
-    border-bottom: 1px solid var(--border-color);
+    background: transparent;
+    border-bottom: none;
     display: flex;
     align-items: center;
     justify-content: space-between;

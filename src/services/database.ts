@@ -13,7 +13,7 @@ export async function getDb(): Promise<Database> {
 // Ensure columns exist, ignoring errors if they're already present
 // This safely patches databases where Tauri migrations failed or were manually patched
 async function runJsMigrations(db: Database) {
-  const columns = [
+  const sellerColumns = [
     'first_name TEXT DEFAULT ""',
     'last_name TEXT DEFAULT ""',
     'default_payment_terms TEXT DEFAULT ""',
@@ -21,9 +21,22 @@ async function runJsMigrations(db: Database) {
     'currency TEXT DEFAULT ""',
     'default_note TEXT DEFAULT ""'
   ];
-  for (const col of columns) {
+  for (const col of sellerColumns) {
     try {
       await db.execute(`ALTER TABLE sellers ADD COLUMN ${col}`);
+    } catch (e) {
+      // Ignore "duplicate column name" errors
+    }
+  }
+
+  const invoiceColumns = [
+    'shipping_net REAL DEFAULT 0',
+    'shipping_tax_rate REAL DEFAULT 19',
+    'already_paid INTEGER DEFAULT 0'
+  ];
+  for (const col of invoiceColumns) {
+    try {
+      await db.execute(`ALTER TABLE invoices ADD COLUMN ${col}`);
     } catch (e) {
       // Ignore "duplicate column name" errors
     }
@@ -239,17 +252,22 @@ export interface Invoice {
   total_net: number;
   total_tax: number;
   total_gross: number;
+  shipping_net?: number;
+  shipping_tax_rate?: number;
+  already_paid?: number;
   created_at?: string;
   items?: InvoiceItem[];
   // joined fields
   seller_name?: string;
   customer_name?: string;
+  paid_amount?: number;
 }
 
 export async function getInvoices(): Promise<Invoice[]> {
   const d = await getDb();
   return await d.select(`
-    SELECT i.*, s.name as seller_name, c.name as customer_name
+    SELECT i.*, s.name as seller_name, c.name as customer_name,
+      (SELECT COALESCE(SUM(amount), 0) FROM payments WHERE invoice_id = i.id) as paid_amount
     FROM invoices i
     LEFT JOIN sellers s ON i.seller_id = s.id
     LEFT JOIN customers c ON i.customer_id = c.id
@@ -275,9 +293,9 @@ export async function getInvoice(id: number): Promise<Invoice | null> {
 export async function createInvoice(inv: Invoice, items: InvoiceItem[]): Promise<number> {
   const d = await getDb();
   const result = await d.execute(
-    `INSERT INTO invoices (seller_id, customer_id, invoice_number, date, due_date, status, notes, payment_terms, total_net, total_tax, total_gross)
-     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)`,
-    [inv.seller_id, inv.customer_id, inv.invoice_number, inv.date, inv.due_date, inv.status, inv.notes, inv.payment_terms, inv.total_net, inv.total_tax, inv.total_gross]
+    `INSERT INTO invoices (seller_id, customer_id, invoice_number, date, due_date, status, notes, payment_terms, total_net, total_tax, total_gross, shipping_net, shipping_tax_rate, already_paid)
+     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)`,
+    [inv.seller_id, inv.customer_id, inv.invoice_number, inv.date, inv.due_date, inv.status, inv.notes, inv.payment_terms, inv.total_net, inv.total_tax, inv.total_gross, inv.shipping_net || 0, inv.shipping_tax_rate || 19, inv.already_paid ? 1 : 0]
   );
   const invoiceId = result.lastInsertId;
   for (const item of items) {
@@ -293,9 +311,9 @@ export async function createInvoice(inv: Invoice, items: InvoiceItem[]): Promise
 export async function updateInvoice(inv: Invoice, items: InvoiceItem[]): Promise<void> {
   const d = await getDb();
   await d.execute(
-    `UPDATE invoices SET seller_id=$1, customer_id=$2, invoice_number=$3, date=$4, due_date=$5, status=$6, notes=$7, payment_terms=$8, total_net=$9, total_tax=$10, total_gross=$11
-     WHERE id=$12`,
-    [inv.seller_id, inv.customer_id, inv.invoice_number, inv.date, inv.due_date, inv.status, inv.notes, inv.payment_terms, inv.total_net, inv.total_tax, inv.total_gross, inv.id]
+    `UPDATE invoices SET seller_id=$1, customer_id=$2, invoice_number=$3, date=$4, due_date=$5, status=$6, notes=$7, payment_terms=$8, total_net=$9, total_tax=$10, total_gross=$11, shipping_net=$12, shipping_tax_rate=$13, already_paid=$14
+     WHERE id=$15`,
+    [inv.seller_id, inv.customer_id, inv.invoice_number, inv.date, inv.due_date, inv.status, inv.notes, inv.payment_terms, inv.total_net, inv.total_tax, inv.total_gross, inv.shipping_net || 0, inv.shipping_tax_rate || 19, inv.already_paid ? 1 : 0, inv.id]
   );
   // recreate items
   await d.execute('DELETE FROM invoice_items WHERE invoice_id = $1', [inv.id]);
@@ -364,12 +382,12 @@ export async function getDashboardStats(): Promise<DashboardStats> {
   const monthStart = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-01`;
 
   const total: { count: number }[] = await d.select('SELECT COUNT(*) as count FROM invoices');
-  const open: { count: number }[] = await d.select("SELECT COUNT(*) as count FROM invoices WHERE status IN ('draft', 'sent')");
-  const paid: { count: number }[] = await d.select("SELECT COUNT(*) as count FROM invoices WHERE status = 'paid'");
+  const open: { count: number }[] = await d.select("SELECT COUNT(*) as count FROM invoices WHERE status = 'draft'");
+  const paid: { count: number }[] = await d.select("SELECT COUNT(*) as count FROM invoices WHERE status IN ('paid', 'sent')");
   const overdue: { count: number }[] = await d.select("SELECT COUNT(*) as count FROM invoices WHERE status = 'overdue'");
-  const revenue: { total: number }[] = await d.select("SELECT COALESCE(SUM(total_gross), 0) as total FROM invoices WHERE status = 'paid'");
-  const monthly: { total: number }[] = await d.select("SELECT COALESCE(SUM(total_gross), 0) as total FROM invoices WHERE status = 'paid' AND date >= $1", [monthStart]);
-  const openAmt: { total: number }[] = await d.select("SELECT COALESCE(SUM(total_gross), 0) as total FROM invoices WHERE status IN ('draft', 'sent', 'overdue')");
+  const revenue: { total: number }[] = await d.select("SELECT COALESCE(SUM(total_gross), 0) as total FROM invoices WHERE status IN ('paid', 'sent')");
+  const monthly: { total: number }[] = await d.select("SELECT COALESCE(SUM(total_gross), 0) as total FROM invoices WHERE status IN ('paid', 'sent') AND date >= $1", [monthStart]);
+  const openAmt: { total: number }[] = await d.select("SELECT COALESCE(SUM(total_gross), 0) as total FROM invoices WHERE status IN ('draft', 'overdue')");
 
   return {
     totalInvoices: total[0]?.count || 0,
@@ -386,7 +404,7 @@ export async function getMonthlyRevenue(months = 12): Promise<{ month: string; r
   const d = await getDb();
   const rows: { month: string; revenue: number }[] = await d.select(`
     SELECT strftime('%Y-%m', date) as month, COALESCE(SUM(total_gross), 0) as revenue
-    FROM invoices WHERE status = 'paid'
+    FROM invoices WHERE status IN ('paid', 'sent')
     GROUP BY strftime('%Y-%m', date)
     ORDER BY month DESC LIMIT $1
   `, [months]);
@@ -399,7 +417,7 @@ export async function getTopCustomers(limit = 5): Promise<{ name: string; total:
     SELECT c.name, COALESCE(SUM(i.total_gross), 0) as total, COUNT(i.id) as count
     FROM invoices i
     JOIN customers c ON i.customer_id = c.id
-    WHERE i.status = 'paid'
+    WHERE i.status IN ('paid', 'sent')
     GROUP BY c.id
     ORDER BY total DESC LIMIT $1
   `, [limit]);
@@ -410,7 +428,7 @@ export async function getRevenueBySellerYear(sellerId: number, year: number): Pr
   const rows: { month: string; revenue: number }[] = await d.select(`
     SELECT strftime('%Y-%m', date) as month, COALESCE(SUM(total_gross), 0) as revenue
     FROM invoices
-    WHERE seller_id = $1 AND strftime('%Y', date) = $2 AND status = 'paid'
+    WHERE seller_id = $1 AND strftime('%Y', date) = $2 AND status IN ('paid', 'sent')
     GROUP BY strftime('%Y-%m', date)
     ORDER BY month
   `, [sellerId, String(year)]);

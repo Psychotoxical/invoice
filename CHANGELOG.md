@@ -5,6 +5,21 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.26] - 2026-02-27
+
+### Added
+- **Partial Payments Visibility**: Partial payments are now explicitly shown underneath the grand total in the Invoice and Dashboard lists.
+- **Collapsible Navigation**: The application sidebar menu can now be toggled to a compact, icon-only mode to save space.
+- **Shipping Costs**: Dedicated input fields for shipping costs and tax rates have been added to the invoice form, automatically calculated into the grand totals and appended to the PDF exports.
+- **Mark as Paid Option**: Added a native checkbox when drafting invoices to immediately mark them as "Already Paid", which adjusts the resulting PDF payment instructions to "Payment already received".
+- **Gross Price Input**: Added a "Brutto eingeben" (Gross Price) toggle for Product items (both in the catalog and quick-add form) to automatically reverse-calculate the net price based on the tax rate.
+- **PDF Overwrite Warning**: The app will now explicitly prompt for confirmation if exporting an invoice PDF would overwrite an identically named file in the destination folder.
+
+### Changed
+- **Input Field UX**: Date pickers now automatically dismiss upon selection, and clicking into number fields (like price or quantity) auto-selects their entire contents for faster typing.
+- **Invoice Status Logic**: Invoices marked as "Sent" (Versendet) are now logically evaluated as paid and no longer contribute to the "open payments" balance on the Dashboard.
+- **UI Styling**: Removed borders and background colors from the top action bar to better integrate with the main content area, providing a cleaner, more modern interface.
+
 ## [1.0.25] - 2026-02-26
 
 ### Added

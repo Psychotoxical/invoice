@@ -1,8 +1,8 @@
 <template>
-  <div class="page-container">
-    <header class="page-header">
-      <h1>❓ {{ $t('help.title') }}</h1>
-    </header>
+  <div>
+    <div class="topbar">
+      <div class="topbar-title">❓ {{ $t('help.title') }}</div>
+    </div>
 
     <div class="page-content">
       <div class="card help-card">

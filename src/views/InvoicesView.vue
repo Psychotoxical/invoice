@@ -54,9 +54,15 @@
                     <option value="cancelled">{{ $t('status.cancelled') }}</option>
                   </select>
                 </td>
-                <td class="text-right">{{ formatCurrency(inv.total_gross) }}</td>
+                <td class="text-right">
+                  <div>{{ formatCurrency(inv.total_gross) }}</div>
+                  <div v-if="Number(inv.paid_amount) > 0 && inv.status !== 'paid' && inv.status !== 'sent'" 
+                       style="font-size: 0.8em; color: var(--success); margin-top: 2px;">
+                    {{ formatCurrency(Number(inv.paid_amount)) }} {{ $t('status.paid') }}
+                  </div>
+                </td>
                 <td class="actions-cell">
-                  <button v-if="inv.status !== 'paid'" class="btn btn-ghost btn-icon" @click="changeStatus(inv, 'paid')" :title="$t('invoices.markPaid')" style="color: var(--success)">✅</button>
+                  <button v-if="inv.status !== 'paid' && inv.status !== 'sent'" class="btn btn-ghost btn-icon" @click="changeStatus(inv, 'paid')" :title="$t('invoices.markPaid')" style="color: var(--success)">✅</button>
                   <button class="btn btn-ghost btn-icon" @click="exportPdf(inv)" :title="$t('invoices.exportPdf')">📄</button>
                   <router-link :to="'/invoices/' + inv.id + '/edit'" class="btn btn-ghost btn-icon" :title="$t('common.edit')">✏️</router-link>
                   <button class="btn btn-ghost btn-icon" @click="duplicate(inv)" :title="$t('invoices.duplicate')">📋</button>

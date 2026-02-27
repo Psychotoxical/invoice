@@ -21,7 +21,7 @@
       </div>
       <div class="tabs">
         <button class="tab" :class="{ active: activeTab === 'all' }" @click="activeTab = 'all'">{{ $t('products.tabAll')
-        }}</button>
+          }}</button>
         <button class="tab" :class="{ active: activeTab === 'product' }" @click="activeTab = 'product'">{{
           $t('products.tabProducts') }}</button>
         <button class="tab" :class="{ active: activeTab === 'service' }" @click="activeTab = 'service'">{{
@@ -120,13 +120,25 @@
                 <option value="Lizenz">{{ $t('products.unitLicense') }}</option>
               </select>
             </div>
+            <div class="form-group" style="display: flex; flex-direction: column; justify-content: center;">
+              <label class="form-label" style="opacity: 0; margin-bottom: 4px;">isGross</label>
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <input type="checkbox" id="isGrossCheck" v-model="formIsGross" />
+                <label for="isGrossCheck" style="font-size: 13px; cursor: pointer; color: var(--text-primary);">Brutto
+                  eingeben</label>
+              </div>
+            </div>
+          </div>
+          <div class="form-row-3">
             <div class="form-group">
-              <label class="form-label">{{ $t('products.netPrice') }} (€) *</label>
-              <input class="form-input" v-model.number="form.price_net" type="number" step="0.01" min="0" />
+              <label class="form-label">{{ formIsGross ? 'Bruttopreis' : $t('products.netPrice') }} (€) *</label>
+              <input class="form-input" v-model.number="formDisplayPrice" type="number" step="0.01" min="0"
+                @focus="selectAll" />
             </div>
             <div class="form-group">
               <label class="form-label">{{ $t('products.taxRate') }} (%)</label>
-              <input class="form-input" v-model.number="form.tax_rate" type="number" step="0.5" min="0" max="100" />
+              <input class="form-input" v-model.number="form.tax_rate" type="number" step="0.5" min="0" max="100"
+                @focus="selectAll" />
             </div>
           </div>
           <div class="form-group" v-if="form.type === 'product'">
@@ -135,9 +147,13 @@
           </div>
         </div>
         <div class="modal-footer">
+          <div v-if="formIsGross" style="font-size: 12px; color: var(--text-secondary); margin-right: auto;">
+            Errechneter Netto-Preis: {{ formatCurrency(calculatedNetPrice) }}
+          </div>
           <button class="btn btn-secondary" @click="confirmClose">{{ $t('common.cancel') }}</button>
-          <button class="btn btn-primary" @click="save" :disabled="!form.name || !form.seller_id">{{ $t('common.save')
-          }}</button>
+          <button class="btn btn-primary" @click="save"
+            :disabled="!form.name || !form.seller_id || formDisplayPrice <= 0">{{ $t('common.save')
+            }}</button>
         </div>
       </div>
     </div>
@@ -178,6 +194,15 @@ const showModal = ref(false);
 const editing = ref(false);
 const deleteTarget = ref<Product | null>(null);
 
+const formIsGross = ref(false);
+const formDisplayPrice = ref(0);
+
+const calculatedNetPrice = computed(() => {
+  if (!formIsGross.value) return formDisplayPrice.value;
+  const taxMultiplier = 1 + (form.value.tax_rate / 100);
+  return Math.round((formDisplayPrice.value / taxMultiplier) * 100) / 100;
+});
+
 const emptyForm = (): Product => ({
   seller_id: 0, name: '', description: '', type: 'product',
   unit: 'Stk', price_net: 0, tax_rate: 19, stock: 0, active: 1
@@ -215,10 +240,12 @@ function formatCurrency(val: number): string {
 }
 
 function openForm(p?: Product) {
+  formIsGross.value = false;
   if (p) {
     editing.value = true;
     form.value = { ...p };
     originalForm.value = { ...p };
+    formDisplayPrice.value = p.price_net;
   } else {
     editing.value = false;
     const f = emptyForm();
@@ -226,6 +253,7 @@ function openForm(p?: Product) {
     if (sellers.value.length === 1 && sellers.value[0].id) f.seller_id = sellers.value[0].id;
     form.value = { ...f };
     originalForm.value = { ...f };
+    formDisplayPrice.value = 0;
   }
   showModal.value = true;
 }
@@ -241,12 +269,17 @@ async function confirmClose() {
 
 async function save() {
   try {
+    form.value.price_net = calculatedNetPrice.value;
     if (editing.value) await updateProduct(form.value);
     else await createProduct(form.value);
     showModal.value = false;
     await load();
     toast.success(t('toast.productSaved'));
   } catch (e) { console.error(e); toast.error(t('toast.error')); }
+}
+
+function selectAll(e: Event) {
+  setTimeout(() => (e.target as HTMLInputElement)?.select(), 10);
 }
 
 function confirmDelete(p: Product) { deleteTarget.value = p; }

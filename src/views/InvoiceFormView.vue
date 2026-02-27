@@ -46,7 +46,7 @@
           <div class="form-row-3">
             <div class="form-group">
               <label class="form-label">{{ $t('common.date') }} *</label>
-              <input class="form-input" type="date" v-model="invoice.date" />
+              <input class="form-input" type="date" v-model="invoice.date" @change="blurInput" />
             </div>
             <div class="form-group">
               <label class="form-label">{{ $t('invoiceForm.paymentTerms') }}</label>
@@ -59,8 +59,14 @@
             </div>
             <div class="form-group">
               <label class="form-label">{{ $t('invoiceForm.dueDate') }}</label>
-              <input class="form-input" type="date" v-model="invoice.due_date" />
+              <input class="form-input" type="date" v-model="invoice.due_date" @change="blurInput" />
             </div>
+          </div>
+          <div class="form-group" style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px;">
+            <input type="checkbox" id="alreadyPaidCheck" v-model="invoice.already_paid" :true-value="1"
+              :false-value="0" />
+            <label for="alreadyPaidCheck" style="font-size: 14px; cursor: pointer; color: var(--text-primary);">{{
+              $t('invoiceForm.markAsPaidCheckbox') }}</label>
           </div>
           <div class="form-group">
             <label class="form-label">{{ $t('common.notes') }}</label>
@@ -105,9 +111,9 @@
                 :class="{ 'drag-over': dragOverIndex === i, 'dragging': dragIndex === i }" style="cursor: grab">
                 <td class="text-center drag-handle" style="cursor: grab; user-select: none">☰</td>
                 <td><input class="form-input" v-model="item.description" :placeholder="$t('common.description')"
-                    @input="recalc" /></td>
+                    @input="recalc" @focus="selectAll" /></td>
                 <td><input class="form-input text-right" v-model.number="item.quantity" type="number" step="0.01"
-                    min="0" @input="recalc" /></td>
+                    min="0" @input="recalc" @focus="selectAll" /></td>
                 <td>
                   <select class="form-select" v-model="item.unit">
                     <option value="Stk">{{ $t('invoiceForm.unitPc') }}</option>
@@ -119,16 +125,16 @@
                   </select>
                 </td>
                 <td><input class="form-input text-right" v-model.number="item.price_net" type="number" step="0.01"
-                    min="0" @input="recalc" /></td>
+                    min="0" @input="recalc" @focus="selectAll" /></td>
                 <td>
                   <div class="flex items-center gap-1">
                     <input class="form-input text-right" v-model.number="item.tax_rate" type="number" step="0.5" min="0"
-                      max="100" style="width: 65px" @change="recalc" />
+                      max="100" style="width: 65px" @change="recalc" @focus="selectAll" />
                     <span style="font-size: 12px; color: var(--text-secondary)">%</span>
                   </div>
                 </td>
                 <td><input class="form-input text-right" v-model.number="item.total_gross" type="number" step="0.01"
-                    min="0" @input="recalcFromGross(i)" /></td>
+                    min="0" @input="recalcFromGross(i)" @focus="selectAll" /></td>
                 <td>
                   <div class="flex gap-1" style="justify-content: flex-end">
                     <button class="btn btn-ghost btn-sm" v-if="!item.product_id" @click="openProductModal(i)"
@@ -139,7 +145,23 @@
               </tr>
             </tbody>
           </table>
-          <div class="empty-state" v-else style="padding: 32px">
+          <div
+            style="padding: 12px 16px; border-top: 1px solid var(--border-color); display: flex; justify-content: flex-end; gap: 16px; align-items: center">
+            <span style="font-size: 13px; font-weight: 500; color: var(--text-primary)">{{
+              $t('invoiceForm.shippingCosts') }}:</span>
+            <div class="flex items-center gap-1">
+              <input class="form-input text-right" type="number" step="0.01" min="0"
+                v-model.number="invoice.shipping_net" style="width: 80px; font-size: 13px" placeholder="0.00"
+                @focus="selectAll" />
+              <span style="font-size: 12px; color: var(--text-secondary)">€</span>
+            </div>
+            <div class="flex items-center gap-1">
+              <input class="form-input text-right" type="number" step="0.5" min="0" max="100"
+                v-model.number="invoice.shipping_tax_rate" style="width: 60px; font-size: 13px" @focus="selectAll" />
+              <span style="font-size: 12px; color: var(--text-secondary)">% {{ $t('invoiceForm.vat') }}</span>
+            </div>
+          </div>
+          <div class="empty-state" v-if="!items.length" style="padding: 32px">
             <div class="empty-desc">{{ $t('invoiceForm.noPositions') }}</div>
           </div>
         </div>
@@ -201,12 +223,13 @@
             <div class="form-row" style="align-items: flex-end">
               <div class="form-group" style="margin-bottom: 0">
                 <label class="form-label" style="font-size: 11px">{{ $t('common.date') }}</label>
-                <input class="form-input" type="date" v-model="newPayment.date" style="font-size: 13px" />
+                <input class="form-input" type="date" v-model="newPayment.date" style="font-size: 13px"
+                  @change="blurInput" />
               </div>
               <div class="form-group" style="margin-bottom: 0">
                 <label class="form-label" style="font-size: 11px">{{ $t('common.amount') }} (€)</label>
                 <input class="form-input text-right" type="number" step="0.01" min="0"
-                  v-model.number="newPayment.amount" style="font-size: 13px" />
+                  v-model.number="newPayment.amount" style="font-size: 13px" @focus="selectAll" />
               </div>
               <div class="form-group" style="margin-bottom: 0">
                 <label class="form-label" style="font-size: 11px">{{ $t('invoiceForm.paymentMethod') }}</label>
@@ -489,14 +512,25 @@
                 <option value="Lizenz">{{ $t('products.unitLicense') }}</option>
               </select>
             </div>
+            <div class="form-group" style="display: flex; flex-direction: column; justify-content: center;">
+              <label class="form-label" style="opacity: 0; margin-bottom: 4px;">isGross</label>
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <input type="checkbox" id="quickIsGrossCheck" v-model="quickIsGross" />
+                <label for="quickIsGrossCheck"
+                  style="font-size: 13px; cursor: pointer; color: var(--text-primary);">Brutto eingeben</label>
+              </div>
+            </div>
+          </div>
+          <div class="form-row-3">
             <div class="form-group">
-              <label class="form-label">{{ $t('products.netPrice') }} (€) *</label>
-              <input class="form-input" v-model.number="newProductForm.price_net" type="number" step="0.01" min="0" />
+              <label class="form-label">{{ quickIsGross ? 'Bruttopreis' : $t('products.netPrice') }} (€) *</label>
+              <input class="form-input" v-model.number="quickDisplayPrice" type="number" step="0.01" min="0"
+                @focus="selectAll" />
             </div>
             <div class="form-group">
               <label class="form-label">{{ $t('products.taxRate') }} (%)</label>
               <input class="form-input" v-model.number="newProductForm.tax_rate" type="number" step="0.5" min="0"
-                max="100" />
+                max="100" @focus="selectAll" />
             </div>
           </div>
           <div class="form-group" v-if="newProductForm.type === 'product'">
@@ -506,9 +540,13 @@
           </div>
         </div>
         <div class="modal-footer">
+          <div v-if="quickIsGross" style="font-size: 12px; color: var(--text-secondary); margin-right: auto;">
+            Errechneter Netto-Preis: {{ formatCurrency(quickCalculatedNetPrice) }}
+          </div>
           <button class="btn btn-secondary" @click="confirmCloseProduct">{{ $t('common.cancel') }}</button>
-          <button class="btn btn-primary" @click="confirmSaveProduct" :disabled="!newProductForm.name">{{
-            $t('common.save') }}</button>
+          <button class="btn btn-primary" @click="confirmSaveProduct"
+            :disabled="!newProductForm.name || quickDisplayPrice <= 0">{{
+              $t('common.save') }}</button>
         </div>
       </div>
     </div>
@@ -531,6 +569,24 @@ import { useToast } from '../composables/useToast';
 import { confirm } from '@tauri-apps/plugin-dialog';
 
 const { locale, t } = useI18n({ useScope: 'global' });
+
+function selectAll(e: Event) {
+  const target = e.target as HTMLInputElement;
+  if (target) {
+    // Kurzes Timeout verhindert, dass der Browser die Markierung durch das 
+    // Setzen des Cursors direkt nach dem Klick wieder aufhebt.
+    setTimeout(() => target.select(), 10);
+  }
+}
+
+function blurInput(e: Event) {
+  (e.target as HTMLInputElement)?.blur();
+}
+
+function formatCurrency(val: number): string {
+  return new Intl.NumberFormat(locale.value === 'de' ? 'de-DE' : 'en-US', { style: 'currency', currency: 'EUR' }).format(val);
+}
+
 const route = useRoute();
 const router = useRouter();
 const toast = useToast();
@@ -550,7 +606,8 @@ const currency = ref('EUR');
 const invoice = ref<Invoice>({
   seller_id: 0, customer_id: 0, invoice_number: '', date: new Date().toISOString().split('T')[0],
   due_date: '', status: 'draft', notes: '', payment_terms: '14 Tage netto',
-  total_net: 0, total_tax: 0, total_gross: 0
+  total_net: 0, total_tax: 0, total_gross: 0,
+  shipping_net: 0, shipping_tax_rate: 19, already_paid: 0
 });
 
 const items = ref<InvoiceItem[]>([]);
@@ -587,6 +644,15 @@ const originalSellerForm = ref<Seller>(emptySeller());
 const newProductForm = ref<Product>(emptyProduct());
 const originalProductForm = ref<Product>(emptyProduct());
 
+const quickIsGross = ref(false);
+const quickDisplayPrice = ref(0);
+
+const quickCalculatedNetPrice = computed(() => {
+  if (!quickIsGross.value) return quickDisplayPrice.value;
+  const taxMultiplier = 1 + (newProductForm.value.tax_rate / 100);
+  return Math.round((quickDisplayPrice.value / taxMultiplier) * 100) / 100;
+});
+
 // Payments
 const payments = ref<Payment[]>([]);
 const newPayment = ref({ date: new Date().toISOString().split('T')[0], amount: 0, method: '', notes: '' });
@@ -603,7 +669,9 @@ const canSave = computed(() =>
 );
 
 const totals = computed(() => {
-  let net = 0, tax = 0, gross = 0;
+  let net = typeof invoice.value.shipping_net === 'number' ? invoice.value.shipping_net : 0;
+  let tax = Math.round(net * (typeof invoice.value.shipping_tax_rate === 'number' ? invoice.value.shipping_tax_rate : 19)) / 100;
+  let gross = net + tax;
   for (const item of items.value) {
     net += item.total_net;
     tax += item.total_tax;
@@ -617,6 +685,13 @@ const taxBreakdown = computed(() => {
   for (const item of items.value) {
     if (!map[item.tax_rate]) map[item.tax_rate] = 0;
     map[item.tax_rate] += item.total_tax;
+  }
+  const sNet = typeof invoice.value.shipping_net === 'number' ? invoice.value.shipping_net : 0;
+  if (sNet > 0) {
+    const sRate = typeof invoice.value.shipping_tax_rate === 'number' ? invoice.value.shipping_tax_rate : 19;
+    const sTax = Math.round(sNet * sRate) / 100;
+    if (!map[sRate]) map[sRate] = 0;
+    map[sRate] += sTax;
   }
   return Object.entries(map)
     .map(([rate, amount]) => ({ rate: Number(rate), amount }))
@@ -795,6 +870,11 @@ async function saveInvoice() {
   invoice.value.total_tax = totals.value.tax;
   invoice.value.total_gross = totals.value.gross;
 
+  // set status to paid if checked, but don't undo paid if already paid and unchecked (handled manually by user if needed)
+  if (invoice.value.already_paid && invoice.value.status === 'draft') {
+    invoice.value.status = 'paid';
+  }
+
   // update positions
   items.value.forEach((item, i) => item.position = i + 1);
 
@@ -814,10 +894,6 @@ async function exportPdf() {
     const full = await getInvoice(invoice.value.id!);
     if (full) { await generateInvoicePdf(full); toast.success(t('toast.pdfExported')); }
   } catch (e) { console.error(e); toast.error(t('toast.error')); }
-}
-
-function formatCurrency(val: number): string {
-  return new Intl.NumberFormat(locale.value === 'de' ? 'de-DE' : 'en-US', { style: 'currency', currency: currency.value || 'EUR' }).format(val);
 }
 
 function formatDate(d: string): string {
@@ -910,6 +986,9 @@ function openProductModal(index: number) {
     return;
   }
 
+  quickIsGross.value = false;
+  quickDisplayPrice.value = item.price_net || 0;
+
   productSaveIndex.value = index;
   const f: Product = {
     seller_id: invoice.value.seller_id,
@@ -957,6 +1036,7 @@ async function confirmCloseProduct() {
 async function confirmSaveProduct() {
   if (!newProductForm.value.name || !newProductForm.value.seller_id) return;
   try {
+    newProductForm.value.price_net = quickCalculatedNetPrice.value;
     const id = await createProduct(newProductForm.value);
 
     if (productSaveIndex.value >= 0) {

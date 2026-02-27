@@ -1,10 +1,10 @@
 <template>
   <div class="app-layout" :data-theme="theme">
-    <aside class="sidebar">
+    <aside class="sidebar" :class="{ collapsed: isCollapsed }">
       <div class="sidebar-header">
-        <div>
-          <h1>📄 {{ $t('app.title') }}</h1>
-          <div class="subtitle">{{ $t('app.subtitle') }}</div>
+        <div class="sidebar-brand">
+          <h1>📄 <span class="nav-text">{{ $t('app.title') }}</span></h1>
+          <div class="subtitle nav-text">{{ $t('app.subtitle') }}</div>
         </div>
         <div class="sidebar-header-actions">
           <button class="sidebar-icon-btn" @click="toggleTheme" :title="theme === 'dark' ? $t('app.lightTheme') : $t('app.darkTheme')">
@@ -16,25 +16,31 @@
         </div>
       </div>
       <nav class="sidebar-nav">
-        <router-link to="/" class="nav-item" :class="{ active: $route.path === '/' }">
-          <span class="nav-icon">📊</span> {{ $t('nav.dashboard') }}
+        <router-link to="/" class="nav-item" :class="{ active: $route.path === '/' }" :title="$t('nav.dashboard')">
+          <span class="nav-icon">📊</span> <span class="nav-text">{{ $t('nav.dashboard') }}</span>
         </router-link>
-        <router-link to="/sellers" class="nav-item" :class="{ active: $route.path === '/sellers' }">
-          <span class="nav-icon">🏢</span> {{ $t('nav.sellers') }}
+        <router-link to="/sellers" class="nav-item" :class="{ active: $route.path === '/sellers' }" :title="$t('nav.sellers')">
+          <span class="nav-icon">🏢</span> <span class="nav-text">{{ $t('nav.sellers') }}</span>
         </router-link>
-        <router-link to="/products" class="nav-item" :class="{ active: $route.path === '/products' }">
-          <span class="nav-icon">📦</span> {{ $t('nav.products') }}
+        <router-link to="/products" class="nav-item" :class="{ active: $route.path === '/products' }" :title="$t('nav.products')">
+          <span class="nav-icon">📦</span> <span class="nav-text">{{ $t('nav.products') }}</span>
         </router-link>
-        <router-link to="/customers" class="nav-item" :class="{ active: $route.path === '/customers' }">
-          <span class="nav-icon">👥</span> {{ $t('nav.customers') }}
+        <router-link to="/customers" class="nav-item" :class="{ active: $route.path === '/customers' }" :title="$t('nav.customers')">
+          <span class="nav-icon">👥</span> <span class="nav-text">{{ $t('nav.customers') }}</span>
         </router-link>
-        <router-link to="/invoices" class="nav-item" :class="{ active: $route.path.startsWith('/invoices') }">
-          <span class="nav-icon">📋</span> {{ $t('nav.invoices') }}
+        <router-link to="/invoices" class="nav-item" :class="{ active: $route.path.startsWith('/invoices') }" :title="$t('nav.invoices')">
+          <span class="nav-icon">📋</span> <span class="nav-text">{{ $t('nav.invoices') }}</span>
         </router-link>
-        <router-link to="/settings" class="nav-item" :class="{ active: $route.path === '/settings' }">
-          <span class="nav-icon">⚙️</span> {{ $t('nav.settings') }}
+        <router-link to="/settings" class="nav-item" :class="{ active: $route.path === '/settings' }" :title="$t('nav.settings')">
+          <span class="nav-icon">⚙️</span> <span class="nav-text">{{ $t('nav.settings') }}</span>
         </router-link>
       </nav>
+      <div class="sidebar-footer">
+        <button class="nav-item toggle-btn" @click="toggleSidebar" :title="isCollapsed ? $t('app.expandMenu') : $t('app.collapseMenu')">
+          <span class="nav-icon">{{ isCollapsed ? '▶' : '◀' }}</span>
+          <span class="nav-text">{{ isCollapsed ? '' : $t('app.collapseMenu') }}</span>
+        </button>
+      </div>
     </aside>
     <main class="main-content">
       <router-view />
@@ -50,13 +56,17 @@ import { getSetting, setSetting } from './services/database';
 import ToastContainer from './components/ToastContainer.vue';
 
 const theme = ref('light');
+const isCollapsed = ref(false);
 
 onMounted(async () => {
   try {
-    const saved = await getSetting('theme');
-    if (saved) theme.value = saved;
+    const savedTheme = await getSetting('theme');
+    if (savedTheme) theme.value = savedTheme;
+    
+    const savedSidebar = await getSetting('sidebarCollapsed');
+    if (savedSidebar === 'true') isCollapsed.value = true;
   } catch (e) {
-    console.warn("Could not load theme setting on startup", e);
+    console.warn("Could not load settings on startup", e);
   }
 });
 
@@ -64,6 +74,15 @@ async function toggleTheme() {
   theme.value = theme.value === 'dark' ? 'light' : 'dark';
   try {
     await setSetting('theme', theme.value);
+  } catch {
+    // ignore in browser dev
+  }
+}
+
+async function toggleSidebar() {
+  isCollapsed.value = !isCollapsed.value;
+  try {
+    await setSetting('sidebarCollapsed', String(isCollapsed.value));
   } catch {
     // ignore in browser dev
   }
