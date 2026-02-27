@@ -244,6 +244,9 @@ export default {
         unitLicense: 'Lizenz',
         taxRate: 'Steuersatz',
         seller: 'Verkäufer',
+        enterGross: 'Brutto eingeben',
+        grossPrice: 'Bruttopreis',
+        calculatedNet: 'Errechneter Netto-Preis'
     },
 
     // Settings

@@ -87,7 +87,7 @@
                 formatCurrency(p.price_net) }})</option>
             </select>
             <button class="btn btn-secondary btn-sm" v-if="selectedProduct" @click="addFromCatalog">{{ $t('common.add')
-              }}</button>
+            }}</button>
             <button class="btn btn-primary btn-sm" @click="addItem">{{ $t('invoiceForm.freePosition') }}</button>
           </div>
         </div>
@@ -469,7 +469,7 @@
         <div class="modal-footer">
           <button class="btn btn-secondary" @click="confirmCloseSeller">{{ $t('common.cancel') }}</button>
           <button class="btn btn-primary" @click="saveQuickSeller" :disabled="!newSellerForm.name">{{ $t('common.save')
-            }}</button>
+          }}</button>
         </div>
       </div>
     </div>
@@ -541,7 +541,7 @@
         </div>
         <div class="modal-footer">
           <div v-if="quickIsGross" style="font-size: 12px; color: var(--text-secondary); margin-right: auto;">
-            Errechneter Netto-Preis: {{ formatCurrency(quickCalculatedNetPrice) }}
+            {{ $t('products.calculatedNet') }}: {{ formatCurrency(quickCalculatedNetPrice) }}
           </div>
           <button class="btn btn-secondary" @click="confirmCloseProduct">{{ $t('common.cancel') }}</button>
           <button class="btn btn-primary" @click="confirmSaveProduct"

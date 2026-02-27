@@ -244,6 +244,9 @@ export default {
         unitLicense: 'License',
         taxRate: 'Tax Rate',
         seller: 'Seller',
+        enterGross: 'Enter gross',
+        grossPrice: 'Gross price',
+        calculatedNet: 'Calculated net price'
     },
 
     // Settings

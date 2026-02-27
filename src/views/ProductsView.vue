@@ -21,7 +21,7 @@
       </div>
       <div class="tabs">
         <button class="tab" :class="{ active: activeTab === 'all' }" @click="activeTab = 'all'">{{ $t('products.tabAll')
-          }}</button>
+        }}</button>
         <button class="tab" :class="{ active: activeTab === 'product' }" @click="activeTab = 'product'">{{
           $t('products.tabProducts') }}</button>
         <button class="tab" :class="{ active: activeTab === 'service' }" @click="activeTab = 'service'">{{
@@ -148,7 +148,7 @@
         </div>
         <div class="modal-footer">
           <div v-if="formIsGross" style="font-size: 12px; color: var(--text-secondary); margin-right: auto;">
-            Errechneter Netto-Preis: {{ formatCurrency(calculatedNetPrice) }}
+            {{ $t('products.calculatedNet') }}: {{ formatCurrency(calculatedNetPrice) }}
           </div>
           <button class="btn btn-secondary" @click="confirmClose">{{ $t('common.cancel') }}</button>
           <button class="btn btn-primary" @click="save"
